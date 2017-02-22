@@ -1,0 +1,11 @@
+<% if (user != null) { %>
+  <h4>Logged in as:&nbsp;<a href="/profile">
+    <% if (user.facebook.token) { %>
+      <%= user.facebook.name %>
+    <% } else if (user.twitter.token) {%>
+      <%= user.twitter.displayName %>
+    <% } else { %>
+      <%= user.local.email %>
+    <% } %>
+  </a></h4>
+<% } %>

@@ -1,0 +1,103 @@
+<ng-form name="addrange" novalidate>
+  <div class="row">
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <label for="rangename">Range Name:</label>
+    </div>
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <input type="text" ng-model="range.name" class="form-control">
+    </div>
+  </div>
+  <p>
+  <div class="row">
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <label for="number">Number:</label>
+    </div>
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <input type="text" ng-model="range.addressNumber" class="form-control" maxlength="10" ng-keypress="numberValue($event)">
+    </div>
+  </div>
+  <p>
+  <div class="row">
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <label for="street">Street:</label>
+    </div>
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <input type="text" ng-model="range.street" class="form-control">
+    </div>
+  </div>
+  <p>
+  <div class="row">
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <label for="city">City:</label>
+    </div>
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <input type="text" ng-model="range.city" class="form-control">
+    </div>
+  </div>
+  <p>
+  <div class="row">
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <label for="State">State:</label>
+    </div>
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <div class="dropdown-container" ng-class="{ show: listVisible }">
+        <select ng-model="range.state" class="form-control">
+          <option ng-repeat="x in states" ng-selected="range.selectedState.name == x.name" value="{{x.abbreviation}}">{{x.name}}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <p>
+  <div class="row">
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <label for="Zip">Zip:</label>
+    </div>
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <input type="text" ng-model="range.zip" class="form-control" maxlength="5" ng-keypress="numberValue($event)">
+    </div>
+  </div>
+  <p>
+  <div class="row">
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <label for="phone">Phone:</label>
+    </div>
+    <!--div class="col-xs-4 col-sm-2 col-md-3">
+      <div><b>Enter your Phone No. in the format of (1-xxx-xxxxx) :</b></div>
+      <div><b>Example of a valid Phone no is :1-999-99999</b></div>
+    </div-->
+    <div class="col-xs-1">
+      <input type="text" name="areacode" maxlength="3" ng-model="range.areacode" ng-keypress="numberValue($event)" class="form-control"/>
+    </div>
+    <div class="col-xs-1">
+      <input type="text"  name="prefix" maxlength="3" ng-model="range.prefix" ng-keypress="numberValue($event)" class="form-control"/>
+    </div>
+    <div class="col-xs-1">
+      <input type="text"  name="number" maxlength="4" ng-model="range.number" ng-keypress="numberValue($event)" class="form-control"/>
+    </div>
+  </div>
+  <p>
+    <div class="row">
+      <div class="col-xs-4 col-sm-2 col-md-3">
+        <label for="Type">Type:</label>
+      </div>
+      <div class="col-xs-4 col-sm-2 col-md-3">
+        <div class="dropdown-container" ng-class="{ show: listVisible }">
+          <select ng-model="range.type" class="form-control">
+            <option ng-repeat="x in rangetypes" ng-selected="range.type == x" value="{{x}}">{{x}}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <p>
+  <div class="row">
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <button ui-sref="search" class="btn btn-primary btn-lg" ng-click="updateRange(range._id)" >Update</button>
+    </div>
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <button ui-sref="search" class="btn btn-info btn-lg">Cancel</a>
+    </div>
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <button ui-sref="search" class="btn btn-warning btn-lg" ng-click="deleteRange(range._id)">Delete</a>
+    </div>
+  </div>
+</ng-form>

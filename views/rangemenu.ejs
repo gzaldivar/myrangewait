@@ -1,0 +1,540 @@
+<html>
+<head>
+  <% include partials/head %>
+</head>
+<body class="container" ng-app="routerApp">
+
+<header>
+  <% include partials/header %>
+</header>
+
+<script>
+var env = {};
+
+// Import variables if present (from env.js)
+if(window){
+  Object.assign(env, window.__env);
+}
+
+try {
+  angular.module('routerApp', ['ui.router'])
+
+    .config(function($stateProvider, $urlRouterProvider) {
+
+      $urlRouterProvider.otherwise('/home');
+
+      $stateProvider
+        .state('home', {
+          url: '/home',
+          templateUrl: 'partials/rangemenuoptions.ejs'
+        })
+        .state('search', {
+          url: '/search',
+          templateUrl: 'partials/search.ejs',
+          controller: 'rangesearchController'
+        })
+        .state('addrange', {
+          url: '/addrange',
+          templateUrl: 'partials/addrange.ejs',
+          controller: 'addRangeController'
+        })
+        .state('edit', {
+          url: '/edit',
+          templateUrl: 'partials/editrange.ejs',
+          controller: 'editRangeController',
+          params: { rangeid: null }
+        })
+    })
+
+    .factory('rangeResults', [ '$http', function($http) {
+      var searchCriteria = null;
+      var searchParam = null;
+      var results = [];
+
+      var setSearchCriteria = function(value, param) {
+        searchCriteria = value;
+        searchParam = param;
+      }
+
+      var clearSearchCriteria = function() {
+        searhCriteria = null;
+        searchParam = null;
+      }
+
+      var refreshSearchResults = function(cblk) {
+        var url = "";
+        var params = {};
+
+        if (searchCriteria === "state") {
+          url = __env.apiUrl + "gunrange/search/state";
+          params = { state: searchParam };
+        } else if (searchCriteria === "name") {
+          url = __env.apiUrl + "gunrange/search/name";
+          params = { name: searchParam };
+        } else {
+          url = __env.apiUrl + "gunrange/search/getbyzip";
+          params = { zip: searchParam };
+        }
+
+        $http({
+          url: url,
+          method: "GET",
+          params: params
+        })
+        .then(function(response){
+          if (response.status == 200) {
+            results = response.data;
+            cblk(results);
+          } else {
+            cblk(results);
+          }
+        });
+
+      }
+
+      var addResults = function(newResults) {
+        results = newResults;
+        return results;
+      };
+
+      var getResults = function() {
+        return results;
+      };
+
+      var removeResults = function() {
+        results = [];
+      }
+
+      var getResultById = function(id) {
+        for (i = 0; i < results.length; i++) {
+          if (id === results[i]._id) {
+            return results[i];
+          }
+        }
+      }
+
+      var removeResultById = function(id) {
+        for (var i =0; i < results.length; i++)
+           if (results[i]._id === id) {
+              results.splice(i,1);
+              return results;
+           }
+      }
+
+      return {
+        addResults: addResults,
+        getResults: getResults,
+        removeResults: removeResults,
+        getResultById : getResultById,
+        removeResultById : removeResultById,
+        clearSearchCriteria : clearSearchCriteria,
+        refreshSearchResults : refreshSearchResults,
+        setSearchCriteria : setSearchCriteria
+      };
+  }])
+
+  .factory('statesList', function() {
+    var states = [
+      {
+          "name": "Alabama",
+          "abbreviation": "AL"
+      },
+      {
+          "name": "Alaska",
+          "abbreviation": "AK"
+      },
+      {
+          "name": "Arizona",
+          "abbreviation": "AZ"
+      },
+      {
+          "name": "Arkansas",
+          "abbreviation": "AR"
+      },
+      {
+          "name": "California",
+          "abbreviation": "CA"
+      },
+      {
+          "name": "Colorado",
+          "abbreviation": "CO"
+      },
+      {
+          "name": "Connecticut",
+          "abbreviation": "CT"
+      },
+      {
+          "name": "Delaware",
+          "abbreviation": "DE"
+      },
+      {
+          "name": "District Of Columbia",
+          "abbreviation": "DC"
+      },
+      {
+          "name": "Florida",
+          "abbreviation": "FL"
+      },
+      {
+          "name": "Georgia",
+          "abbreviation": "GA"
+      },
+      {
+          "name": "Hawaii",
+          "abbreviation": "HI"
+      },
+      {
+          "name": "Idaho",
+          "abbreviation": "ID"
+      },
+      {
+          "name": "Illinois",
+          "abbreviation": "IL"
+      },
+      {
+          "name": "Indiana",
+          "abbreviation": "IN"
+      },
+      {
+          "name": "Iowa",
+          "abbreviation": "IA"
+      },
+      {
+          "name": "Kansas",
+          "abbreviation": "KS"
+      },
+      {
+          "name": "Kentucky",
+          "abbreviation": "KY"
+      },
+      {
+          "name": "Louisiana",
+          "abbreviation": "LA"
+      },
+      {
+          "name": "Maine",
+          "abbreviation": "ME"
+      },
+      {
+          "name": "Maryland",
+          "abbreviation": "MD"
+      },
+      {
+          "name": "Massachusetts",
+          "abbreviation": "MA"
+      },
+      {
+          "name": "Michigan",
+          "abbreviation": "MI"
+      },
+      {
+          "name": "Minnesota",
+          "abbreviation": "MN"
+      },
+      {
+          "name": "Mississippi",
+          "abbreviation": "MS"
+      },
+      {
+          "name": "Missouri",
+          "abbreviation": "MO"
+      },
+      {
+          "name": "Montana",
+          "abbreviation": "MT"
+      },
+      {
+          "name": "Nebraska",
+          "abbreviation": "NE"
+      },
+      {
+          "name": "Nevada",
+          "abbreviation": "NV"
+      },
+      {
+          "name": "New Hampshire",
+          "abbreviation": "NH"
+      },
+      {
+          "name": "New Jersey",
+          "abbreviation": "NJ"
+      },
+      {
+          "name": "New Mexico",
+          "abbreviation": "NM"
+      },
+      {
+          "name": "New York",
+          "abbreviation": "NY"
+      },
+      {
+          "name": "North Carolina",
+          "abbreviation": "NC"
+      },
+      {
+          "name": "North Dakota",
+          "abbreviation": "ND"
+      },
+      {
+          "name": "Ohio",
+          "abbreviation": "OH"
+      },
+      {
+          "name": "Oklahoma",
+          "abbreviation": "OK"
+      },
+      {
+          "name": "Oregon",
+          "abbreviation": "OR"
+      },
+      {
+          "name": "Pennsylvania",
+          "abbreviation": "PA"
+      },
+      {
+          "name": "Rhode Island",
+          "abbreviation": "RI"
+      },
+      {
+          "name": "South Carolina",
+          "abbreviation": "SC"
+      },
+      {
+          "name": "South Dakota",
+          "abbreviation": "SD"
+      },
+      {
+          "name": "Tennessee",
+          "abbreviation": "TN"
+      },
+      {
+          "name": "Texas",
+          "abbreviation": "TX"
+      },
+      {
+          "name": "Utah",
+          "abbreviation": "UT"
+      },
+      {
+          "name": "Vermont",
+          "abbreviation": "VT"
+      },
+      {
+          "name": "Virginia",
+          "abbreviation": "VA"
+      },
+      {
+          "name": "Washington",
+          "abbreviation": "WA"
+      },
+      {
+          "name": "West Virginia",
+          "abbreviation": "WV"
+      },
+      {
+          "name": "Wisconsin",
+          "abbreviation": "WI"
+      },
+      {
+          "name": "Wyoming",
+          "abbreviation": "WY"
+      }
+    ];
+
+    var getStateList = function() {
+      return states;
+    }
+
+    var getSelectedState = function(aState) {
+      for (i = 0; i < states.length; i++) {
+        if (aState === states[i].abbreviation) {
+          return states[i];
+        }
+      }
+    }
+
+    return {
+      getStateList : getStateList,
+      getSelectedState : getSelectedState
+    }
+  })
+
+  .controller('rangesearchController', ['$scope','$http', '$location', '$q', 'rangeResults', 'statesList',
+  function($scope, $http, $location, $q, rangeResults, statesList) {
+
+    rangeResults.refreshSearchResults(function(results) {
+      $scope.searchresults = results;
+    })
+
+    $scope.numberValue = function($event){
+            if(isNaN(String.fromCharCode($event.keyCode))){
+                $event.preventDefault();
+            }
+    };
+
+    $scope.doSomething = function() {
+      $http({
+        url: __env.apiUrl + "gunrange/search/getbyzip",
+        method: "GET",
+        params: { zip : $scope.search.zip }
+      })
+      .then(function(response){
+        if (response.status == 200) {
+          $scope.searchresults = response.data;
+        } else {
+
+        }
+      });
+    };
+
+    $scope.searchbyname = function() {
+      $scope.search.state = null;
+      rangeResults.removeResults();
+      rangeResults.setSearchCriteria("name", $scope.search.name);
+
+      rangeResults.refreshSearchResults(function(results) {
+        $scope.searchresults = results;
+      });
+    };
+
+    $scope.searchbystate = function(state) {
+      $scope.search.name = "";
+      rangeResults.removeResults;
+      rangeResults.setSearchCriteria("state", state.abbreviation);
+
+      rangeResults.refreshSearchResults(function(results) {
+        $scope.searchresults = results;
+      });
+    };
+
+    $scope.showrange = function(rangeid) {
+      $scope.range = rangeResults.getResultById(rangeid);
+    };
+
+    $scope.phoneNumbr = /^\+?\d{1}[- ]?\d{3}[- ]?\d{5}$/;
+
+    $scope.states = statesList.getStateList();
+  }])
+
+  .controller('addRangeController', ['$scope', '$http', '$location', 'rangeResults', 'statesList', function(
+    $scope, $http, $location, rangeResults, statesList) {
+
+      $scope.errorMessage = "Enter range information below ......";
+      $scope.states = statesList.getStateList();
+
+      $scope.range = {
+        areacode : "000",
+        prefix: "000",
+        number: "000"
+      };
+
+      $scope.addnewrange = function() {
+        if ($scope.range.name && $scope.range.state) {
+          $scope.phone = "(" + $scope.range.areacode + ") " + $scope.range.prefix + "-" + $scope.range.number;
+
+          $http({
+            url: __env.apiUrl + "gunrange",
+            method: "POST",
+            data:  $scope.range
+          })
+          .then(function(response) {
+            if (response.status == 200) {
+              $scope.errorMessage = "Range Added Succesfully!";
+            } else {
+              console.log(response);
+            }
+          });
+        } else {
+          $scope.errorMessage = "Range name and State are required!"
+        }
+      };
+
+  }])
+
+  .controller('editRangeController', ['$scope', '$stateParams', '$http', 'rangeResults', 'statesList',
+  function($scope, $stateParams, $http, rangeResults, statesList) {
+    var range = rangeResults.getResultById($stateParams.rangeid);
+
+    if (range && range.phone) {
+      var phonearray = range.phone.split("-");
+      range.areacode = range.phone.substring(1, 4);
+      var prefixarray = phonearray[0].split(" ");
+      range.prefix = prefixarray[1];
+      range.number = phonearray[1];
+    }
+
+    $scope.states = statesList.getStateList();
+    $scope.range = range;
+    $scope.range.selectedState = statesList.getSelectedState(range.state);
+    $scope.rangetypes = ['Indoor', 'Outdoor'];
+
+    $scope.updateRange = function(rangeid) {
+      $scope.range.phone = "(" + $scope.range.areacode + ") " + $scope.range.prefix + "-" + $scope.range.number;
+      $http({
+        url: __env.apiUrl + "gunrange/" + rangeid,
+        method: "PUT",
+        data:  $scope.range
+      })
+      .then(function(response) {
+        if (response.status == 200) {
+          $scope.searchresults = rangeResults.addResults($scope.range);
+        } else {
+          console.log(response);
+        }
+      });
+    };
+
+    $scope.deleteRange = function(rangeid) {
+      $http({
+        url: __env.apiUrl + "gunrange/" + rangeid,
+        method: "DELETE"
+      })
+      .then(function(response) {
+        if (response.status == 200) {
+          $scope.searchresults = rangeResults.removeResultById(rangeid);
+        } else {
+          console.log("error= " + response.status);
+        }
+      });
+    };
+
+  }]);
+} catch(e) {
+  console.log(e);
+}
+
+  //      angular.module('rangeapp', ['ui-router', 'ngResource'])
+      //---------------
+      // Services
+      //---------------
+      //---------------
+      // Controllers
+      //---------------
+      //---------------
+      // Routes
+      //---------------
+//        .config(['$routeProvider', function ($routeProvider) {
+//          $routeProvider
+//            .when('/', {
+//              templateUrl: 'partials/rangemenuoptions.ejs'
+//            })
+//            .when('/foo', {
+//              templateUrl: 'partials/rangesearch.ejs'
+//            })
+//        }]);
+  </script>
+
+<div class="container">
+
+    <div class="row">
+      <div ui-view></div>
+    </div>
+
+    <p>
+    <footer>
+        <% include partials/footer %>
+    </footer>
+
+</div>
+</body>
+</html>

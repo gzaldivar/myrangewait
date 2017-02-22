@@ -1,0 +1,42 @@
+<DOCTYPE html>
+<doctype html>
+<html>
+<head>
+  <% include partials/head %>
+</head>
+<body>
+<body class="container">
+
+  <header>
+    <% include partials/header %>
+  </header>
+  <div class="container">
+
+      <div class="jumbotron text-center">
+          <h1><!--span class="fa fa-lock"></span-->Welcome to <br><%= title %></h1>
+          <br>
+          <h3 class="text-primary">See what the wait time is at your local shooting range.</h3>
+          <h3 class="text-primary">A login let's you post wait times from the range!</h3>
+
+          <h4>Login or Register with:</h4>
+          <br>
+
+          <a href="/login" class="btn btn-default"><span class="fa fa-user"></span>Login</a>
+          <!--a href="/signup" class="btn btn-default"><span class="fa fa-user"></span>Signup</a-->
+          <a href="/auth/facebook" class="btn btn-primary"><span class="fa fa-facebook"></span> Facebook</a>
+          <a href="/auth/twitter" class="btn btn-info"><span class="fa fa-twitter"></span> Twitter</a>
+          <br>
+          <h4>Or just see what the wait times are!</h4>
+          <br>
+          <a href="/rangemenu" class="btn btn-info"></span>Check it out!</a>
+      </div>
+
+  </div>
+
+<p>
+    <footer>
+        <% include partials/footer %>
+    </footer>
+
+  </body>
+</html>

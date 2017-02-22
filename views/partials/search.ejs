@@ -1,0 +1,71 @@
+<flash-message></flash-message>
+<form name="range" novalidate>
+  <div class="row">
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <label for="State">State:</label>
+    </div>
+    <div class="dropdown-container" ng-class="{ show: listVisible }">
+      <div class="col-xs-4 col-sm-2 col-md-3">
+        <select ng-model="search.state" ng-options="x.name for x in states" class="form-control">
+        </select>
+      </div>
+    </div>
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <button ui-sref="search" class="btn btn-primary btn-sm" ng-click="searchbystate(search.state)" >Search</button>
+    </div>
+  </div>
+  <p>
+  <div class="row">
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <label for="rangename">Range Name:</label>
+    </div>
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <input type="text" ng-model="search.name" class="form-control">
+    </div>
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <button ui-sref="search" class="btn btn-primary btn-sm" ng-click="searchbyname(search.name)" >Search</button>
+    </div>
+  </div>
+  <p>
+  <div class="row">
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <label for="Zip">Zip:</label>
+    </div>
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <input type="text" ng-model="search.zip" class="form-control" maxlength="5" ng-keypress="numberValue($event)">
+    </div>
+    <div class="col-xs-4 col-sm-2 col-md-3">
+      <button ui-sref="search" class="btn btn-primary btn-sm" ng-click="doSomething(search.zip)" >Search</button>
+    </div>
+  </div>
+</form>
+
+<div class="row">
+  <div class="col-xs-6 col-md-4">
+    <a ui-sref="addrange">
+      <button type="button" class="btn btn-info btn-lg">Add Range</button>
+    </a>
+  </div>
+</div>
+
+<p>
+<div class="row">
+  <table class="table table-striped table-bordered">
+    <tr>
+      <th>Name</th>
+      <th>Address</th>
+      <th>City</th>
+      <th>State</th>
+      <th>Zip</th>
+      <th>Phone</th>
+    </tr>
+    <tr ng-repeat="result in searchresults">
+      <td><a ui-sref="edit({rangeid: result._id})" ng-model="searchlist.id" ng-click="showrange(result._id)">{{ result.name }}</a></td>
+      <td>{{ result.addressNumber + " " +  result.street }}</td>
+      <td>{{ result.city }}</td>
+      <td>{{ result.state }}</td>
+      <td>{{ result.zip }}</td>
+      <td>{{ result.phone }}</td>
+    </tr>
+  </table>
+</div>
