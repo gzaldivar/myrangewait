@@ -1,7 +1,11 @@
-<flash-message></flash-message>
+<div class="row">
+  <div class="alert alert-info">
+    <h4 ng-model="errorMessage">{{errorMessage}}</h4>
+  </div>
+</div>
 <form name="range" novalidate>
   <div class="row">
-    <div class="col-xs-4 col-sm-2 col-md-3">
+    <div class="col-xs-2 col-sm-1 col-md-2">
       <label for="State">State:</label>
     </div>
     <div class="dropdown-container" ng-class="{ show: listVisible }">
@@ -16,7 +20,7 @@
   </div>
   <p>
   <div class="row">
-    <div class="col-xs-4 col-sm-2 col-md-3">
+    <div class="col-xs-2 col-sm-1 col-md-2">
       <label for="rangename">Range Name:</label>
     </div>
     <div class="col-xs-4 col-sm-2 col-md-3">
@@ -28,14 +32,20 @@
   </div>
   <p>
   <div class="row">
-    <div class="col-xs-4 col-sm-2 col-md-3">
+    <div class="col-xs-2 col-sm-1 col-md-2">
       <label for="Zip">Zip:</label>
     </div>
-    <div class="col-xs-4 col-sm-2 col-md-3">
+    <div class="col-xs-1 col-sm-1 col-md-1">
       <input type="text" ng-model="search.zip" class="form-control" maxlength="5" ng-keypress="numberValue($event)">
     </div>
+    <div class="col-xs-1 col-sm-1 col-md-1">
+      <label for="Distance">Distance:</label>
+    </div>
+    <div class="col-xs-1 col-sm-1 col-md-1">
+      <input type="text" ng-model="search.distance" class="form-control" maxlength="4" ng-keypress="numberValue($event)">
+    </div>
     <div class="col-xs-4 col-sm-2 col-md-3">
-      <button ui-sref="search" class="btn btn-primary btn-sm" ng-click="doSomething(search.zip)" >Search</button>
+      <button ui-sref="search" class="btn btn-primary btn-sm" ng-click="searchbyzip(search.distance)" >Search</button>
     </div>
   </div>
 </form>
@@ -58,6 +68,7 @@
       <th>State</th>
       <th>Zip</th>
       <th>Phone</th>
+      <th>Details</th>
     </tr>
     <tr ng-repeat="result in searchresults">
       <td><a ui-sref="edit({rangeid: result._id})" ng-model="searchlist.id" ng-click="showrange(result._id)">{{ result.name }}</a></td>
@@ -66,6 +77,7 @@
       <td>{{ result.state }}</td>
       <td>{{ result.zip }}</td>
       <td>{{ result.phone }}</td>
+      <td><a ui-sref="details({rangeid: result._id})" ng-model="searchlist.id" ng-click="addDetails(result._id)" ng-show="result.stalls.length > 0">Details</a></td>
     </tr>
   </table>
 </div>

@@ -7,7 +7,7 @@ var Poster = new mongoose.Schema({
 });
 
 var GunStall = new mongoose.Schema({
-  stalltype : { type: String, enum: ['Pistol', 'Rifle', 'Shotgun'] },
+  type : { type: String, enum: ['Pistol', 'Rifle', 'Shotgun'] },
   numberofstalls : Number,
   length: Number
 });
@@ -19,6 +19,10 @@ var GunRangeSchema = new mongoose.Schema({
   city: String,
   state: { type: String, required: true },
   zip: String,
+  loc: {
+    type: [Number],  // [<longitude>, <latitude>]
+    index: '2d'      // create the geospatial index
+  },
 //  areacode: Number,
 //  prefix: Number,
 //  number: Number,

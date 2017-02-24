@@ -16,6 +16,7 @@
     "urlencode": "~1.1.0",
     "mongoose": "~4.8.4",
     "passport": "~0.3.2",
-    "connect-flash": "~0.1.1"
+    "connect-flash": "~0.1.1",
+    "node-geocoder": "~3.16.0"
   }
 }

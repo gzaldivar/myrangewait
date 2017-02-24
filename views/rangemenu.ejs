@@ -21,7 +21,7 @@ try {
 
     .config(function($stateProvider, $urlRouterProvider) {
 
-      $urlRouterProvider.otherwise('/home');
+      $urlRouterProvider.otherwise('/search');
 
       $stateProvider
         .state('home', {
@@ -346,16 +346,60 @@ try {
     }
 
     var getSelectedState = function(aState) {
-      for (i = 0; i < states.length; i++) {
-        if (aState === states[i].abbreviation) {
-          return states[i];
+      if (aState) {
+        for (i = 0; i < states.length; i++) {
+          if (aState === states[i].abbreviation) {
+            return states[i];
+          }
         }
+      } else {
+        return null;
       }
     }
 
     return {
       getStateList : getStateList,
       getSelectedState : getSelectedState
+    }
+  })
+
+  .factory('stallPositionFactory', function() {
+
+    var rangestalls = function(range) {
+      var stalls = [];
+
+      if (range.pistolstalls) {
+        var entry = {
+          type: "Pistol",
+          numberofstalls: range.pistolstalls,
+          length: range.pistolStallLength
+      }
+        stalls.push(entry);
+      }
+
+      if (range.riflestalls) {
+        var entry = {
+          type: "Rifle",
+          numberofstalls: range.riflestalls,
+          length: range.rifleStallLength
+      }
+        stalls.push(entry);
+      }
+
+      if (range.shotgunstalls) {
+        var entry = {
+          type: "Shotgun",
+          numberofstalls: range.shotgunstalls,
+          length: range.shotgunStallLength
+      }
+        stalls.push(entry);
+      }
+
+      return stalls;
+    }
+
+    return {
+      rangestalls: rangestalls
     }
   })
 
@@ -372,17 +416,23 @@ try {
             }
     };
 
-    $scope.doSomething = function() {
+    $scope.searchbyzip = function() {
       $http({
         url: __env.apiUrl + "gunrange/search/getbyzip",
         method: "GET",
-        params: { zip : $scope.search.zip }
+        params: {
+          zip : $scope.search.zip,
+          distance: $scope.search.distance
+        }
       })
       .then(function(response){
         if (response.status == 200) {
+          $scope.errorMessage = response.data.message;
           $scope.searchresults = response.data;
+        } else if (response.status == 404) {
+          $scope.errorMessage = response.error;
         } else {
-
+          console.log(response);
         }
       });
     };
@@ -421,16 +471,13 @@ try {
 
       $scope.errorMessage = "Enter range information below ......";
       $scope.states = statesList.getStateList();
-
-      $scope.range = {
-        areacode : "000",
-        prefix: "000",
-        number: "000"
-      };
+      $scope.rangetypes = ['Indoor', 'Outdoor'];
 
       $scope.addnewrange = function() {
-        if ($scope.range.name && $scope.range.state) {
-          $scope.phone = "(" + $scope.range.areacode + ") " + $scope.range.prefix + "-" + $scope.range.number;
+        if ($scope.range.name && $scope.range.addressNumber && $scope.range.street && $scope.range.city) {
+          $scope.range.phone = "(" + $scope.range.areacode + ") " + $scope.range.prefix + "-" + $scope.range.number;
+
+          $scope.range.stalls = stallPositionFactory.rangestalls($scope.range);
 
           $http({
             url: __env.apiUrl + "gunrange",
@@ -440,36 +487,65 @@ try {
           .then(function(response) {
             if (response.status == 200) {
               $scope.errorMessage = "Range Added Succesfully!";
+            } else if (response.status == 404) {
+              $scope.errorMessage = response.error;
             } else {
               console.log(response);
             }
           });
         } else {
-          $scope.errorMessage = "Range name and State are required!"
+          $scope.errorMessage = "Range name, address and city are required!"
         }
       };
 
   }])
 
-  .controller('editRangeController', ['$scope', '$stateParams', '$http', 'rangeResults', 'statesList',
-  function($scope, $stateParams, $http, rangeResults, statesList) {
+  .controller('editRangeController', ['$scope', '$stateParams', '$http', 'rangeResults', 'statesList', 'stallPositionFactory',
+    function($scope, $stateParams, $http, rangeResults, statesList, stallPositionFactory) {
+
+    $scope.errorMessage = "Update Range Information"
     var range = rangeResults.getResultById($stateParams.rangeid);
 
-    if (range && range.phone) {
-      var phonearray = range.phone.split("-");
-      range.areacode = range.phone.substring(1, 4);
-      var prefixarray = phonearray[0].split(" ");
-      range.prefix = prefixarray[1];
-      range.number = phonearray[1];
+    if (range) {
+
+      if (range.phone) {
+        var phonearray = range.phone.split("-");
+        range.areacode = range.phone.substring(1, 4);
+        var prefixarray = phonearray[0].split(" ");
+        range.prefix = prefixarray[1];
+        range.number = phonearray[1];
+      }
+
+      $scope.range = range;
+      $scope.selectedtype = range.rangetype;
+      $scope.range.selectedState = statesList.getSelectedState(range.state);
+
+      if (range.stalls) {
+        for (i = 0; i < range.stalls.length; i++) {
+          if (range.stalls[i].type === "Pistol") {
+            $scope.range.pistolstalls = range.stalls[i].numberofstalls;
+            $scope.range.pistolStallLength = range.stalls[i].length;
+          } else if (range.stalls[i].type === "Rifle") {
+            $scope.range.riflestalls = range.stalls[i].numberofstalls;
+            $scope.range.rifleStallLength = range.stalls[i].length;
+          } else if (range.stalls[i].type === "Shotgun") {
+            $scope.range.shotgunstalls = range.stalls[i].numberofstalls;
+            $scope.range.shotgunStallLength = range.stalls[i].length;
+          }
+        }
+      }
     }
 
     $scope.states = statesList.getStateList();
-    $scope.range = range;
-    $scope.range.selectedState = statesList.getSelectedState(range.state);
     $scope.rangetypes = ['Indoor', 'Outdoor'];
 
     $scope.updateRange = function(rangeid) {
-      $scope.range.phone = "(" + $scope.range.areacode + ") " + $scope.range.prefix + "-" + $scope.range.number;
+      if ($scope.range.areacode && $scope.range.prefix && $scope.range.number) {
+        $scope.range.phone = "(" + $scope.range.areacode + ") " + $scope.range.prefix + "-" + $scope.range.number;
+      }
+
+      $scope.range.stalls = stallPositionFactory.rangestalls($scope.range);
+
       $http({
         url: __env.apiUrl + "gunrange/" + rangeid,
         method: "PUT",
@@ -478,6 +554,8 @@ try {
       .then(function(response) {
         if (response.status == 200) {
           $scope.searchresults = rangeResults.addResults($scope.range);
+        } else if (response.status == 404) {
+          $scope.errorMessage = response.error;
         } else {
           console.log(response);
         }
