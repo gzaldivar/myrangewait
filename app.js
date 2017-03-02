@@ -6,6 +6,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
+var cors = require('cors');
 
 var mongoose = require('mongoose');
 var passport = require('passport');
@@ -14,6 +15,8 @@ var flash    = require('connect-flash');
 var configDB = require('./config/database.js');
 
 var app = express();
+
+process.env.NODE_ENV = 'development';
 
 app.get('/partials/:name', function (req, res) {
   var name = req.params.name;
@@ -31,10 +34,16 @@ var index = require('./routes/index');
 var users = require('./routes/users');
 var gunrange = require('./routes/gunrange');
 
+mongoose.Model.on('index', function(err) {
+  if (err) logger.error(err);
+});
+
 // Use native Node promises
 mongoose.Promise = global.Promise;
 // configuration ===============================================================
-mongoose.connect(configDB.url)
+console.log(app.settings.env);
+
+mongoose.connect(configDB.mongoURI[app.settings.env])
   .then(() =>  console.log('connection succesful'))
   .catch((err) => console.error(err));
 
@@ -48,6 +57,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(cors());
 
 app.use(cookieParser());
 
@@ -75,6 +85,7 @@ app.use('/gunrange', gunrange);
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
   next();
 });
 

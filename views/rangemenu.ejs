@@ -49,6 +49,7 @@ try {
     .factory('rangeResults', [ '$http', function($http) {
       var searchCriteria = null;
       var searchParam = null;
+      var distance = 0;
       var results = [];
 
       var setSearchCriteria = function(value, param) {
@@ -71,25 +72,26 @@ try {
         } else if (searchCriteria === "name") {
           url = __env.apiUrl + "gunrange/search/name";
           params = { name: searchParam };
-        } else {
+        } else  if (searchCriteria ==="zip") {
           url = __env.apiUrl + "gunrange/search/getbyzip";
           params = { zip: searchParam };
         }
 
-        $http({
-          url: url,
-          method: "GET",
-          params: params
-        })
-        .then(function(response){
-          if (response.status == 200) {
-            results = response.data;
-            cblk(results);
-          } else {
-            cblk(results);
-          }
-        });
-
+        if (searchCriteria != null) {
+          $http({
+            url: url,
+            method: "GET",
+            params: params
+          })
+          .then(function(response){
+            if (response.status == 200) {
+              results = response.data;
+              cblk(results);
+            } else {
+              cblk(results);
+            }
+          });
+        }
       }
 
       var addResults = function(newResults) {
@@ -410,6 +412,8 @@ try {
       $scope.searchresults = results;
     })
 
+    $scope.errorMessage = "Enter Search Criteria";
+
     $scope.numberValue = function($event){
             if(isNaN(String.fromCharCode($event.keyCode))){
                 $event.preventDefault();
@@ -466,8 +470,8 @@ try {
     $scope.states = statesList.getStateList();
   }])
 
-  .controller('addRangeController', ['$scope', '$http', '$location', 'rangeResults', 'statesList', function(
-    $scope, $http, $location, rangeResults, statesList) {
+  .controller('addRangeController', ['$scope', '$http', '$location', 'rangeResults', 'statesList', 'stallPositionFactory', function(
+    $scope, $http, $location, rangeResults, statesList, stallPositionFactory) {
 
       $scope.errorMessage = "Enter range information below ......";
       $scope.states = statesList.getStateList();
@@ -475,7 +479,10 @@ try {
 
       $scope.addnewrange = function() {
         if ($scope.range.name && $scope.range.addressNumber && $scope.range.street && $scope.range.city) {
-          $scope.range.phone = "(" + $scope.range.areacode + ") " + $scope.range.prefix + "-" + $scope.range.number;
+
+          if ($scope.range.areacode && $scope.range.prefix && $scope.range.number) {
+            $scope.range.phone = "(" + $scope.range.areacode + ") " + $scope.range.prefix + "-" + $scope.range.number;
+          }
 
           $scope.range.stalls = stallPositionFactory.rangestalls($scope.range);
 
@@ -500,8 +507,8 @@ try {
 
   }])
 
-  .controller('editRangeController', ['$scope', '$stateParams', '$http', 'rangeResults', 'statesList', 'stallPositionFactory',
-    function($scope, $stateParams, $http, rangeResults, statesList, stallPositionFactory) {
+  .controller('editRangeController', ['$scope', '$stateParams', '$http', '$location', 'rangeResults', 'statesList', 'stallPositionFactory',
+    function($scope, $stateParams, $http, $location, rangeResults, statesList, stallPositionFactory) {
 
     $scope.errorMessage = "Update Range Information"
     var range = rangeResults.getResultById($stateParams.rangeid);
@@ -553,7 +560,8 @@ try {
       })
       .then(function(response) {
         if (response.status == 200) {
-          $scope.searchresults = rangeResults.addResults($scope.range);
+//          $scope.searchresults = rangeResults.addResults($scope.range);
+          $location.url('/search');
         } else if (response.status == 404) {
           $scope.errorMessage = response.error;
         } else {

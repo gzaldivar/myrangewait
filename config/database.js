@@ -1,5 +1,8 @@
-module.exports = {
+var config = {};
 
-    'url' : 'mongodb://localhost/gunrangewait' // looks like mongodb://<user>:<pass>@mongo.onmodulus.net:27017/Mikha4ot
-
+config.mongoURI = {
+  development: 'mongodb://localhost/gunrangewait',
+  test: 'mongodb://localhost/gunrangewait-test'
 };
+
+module.exports = config;

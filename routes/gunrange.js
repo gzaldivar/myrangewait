@@ -15,8 +15,9 @@ var geocoder = nodeGeocoder(options);
 
 /* GET /gunrange listing. */
 router.get('/', function(req, res, next) {
-  Gunrange.find(function (err, docs) {
+  Gunrange.find({}, function (err, docs) {
     if (err) return next(err);
+    console.log(docs);
     res.json(docs);
   });
 });
@@ -39,13 +40,12 @@ router.get('/search/getbyzip', function(req, res, next) {
 
   var limit = req.query.limit || 10;
 
-  // get the max distance or set it to 8 kilometers
-  var maxDistance = (req.query.distance * 1.60934) || 8;
+  // get the max distance or set it to 10 miles. Miles is multplied by number of meters in a mile - 1609.34
+  var maxDistance = (req.query.distance * 1609.34) || 16093.4;
 
-console.log("maxDistance= " + maxDistance);
   // we need to convert the distance to radians
   // the raduis of Earth is approximately 6371 kilometers
-  maxDistance /= 6371;
+//  maxDistance /= 6371;
 
   geocoder.geocode(req.query.zip, function (err, georesult) {
     if (err) {
@@ -53,15 +53,25 @@ console.log("maxDistance= " + maxDistance);
     } else {
       console.log("longitude= " + georesult[0].longitude + " latitude= " + georesult[0].latitude +
     " maxdistance= " + maxDistance);
-      Gunrange.find({ loc:
-        {
-          "$near": [georesult[0].longitude, georesult[0].latitude],
-          "$maxDistance": maxDistance
+
+      Gunrange.find({
+        loc: {
+          $near: {
+            $geometry: {
+              type: "Point",
+              coordinates: [parseFloat(georesult[0].longitude), parseFloat(georesult[0].latitude)]
+            },
+            $maxDistance: maxDistance
+          }
         }
+//        {
+//          "$near": [georesult[0].longitude, georesult[0].latitude],
+//          "$maxDistance": maxDistance
       })
       .limit(limit)
       .exec(function(err, docs) {
         if (err) {
+          console.log(err);
           res.status(404).send(err);
         } else {
           if (docs.length > 0) {
@@ -82,8 +92,11 @@ router.get('/search/state', function(req, res, next) {
   var query = new RegExp(urlencode(req.query.state), "i");
   console.log(query);
   Gunrange.find({ state: query }, function (err, docs) {
-    if (err) return next(err);
-    res.json(docs);
+    if (err) {
+      return next(err);
+    } else {
+      res.json(docs);
+    }
   });
 });
 
@@ -100,6 +113,7 @@ router.get('/search/name', function(req, res, next) {
 
 /* POST /Gunrange */
 router.post('/', function(req, res, next) {
+  console.log("adding a range");
   var address = req.body.addressNumber + " " + req.body.street + " " + req.body.city;
 
   geocoder.geocode(address, function (err, georesult) {
@@ -115,7 +129,8 @@ router.post('/', function(req, res, next) {
 
         Gunrange.create(range, function (err, post) {
           if (err) {
-            res.json(err);
+            console.log(err);
+            res.status(404).send({ error: err.errmsg });
           } else {
             res.json(post);
           }
@@ -136,11 +151,23 @@ router.put('/:id', function(req, res, next) {
         console.log(err);
       } else {
 
-        range = createRange(req, georesult);
+        var aRange = createRange(req, georesult);
 
-        if (range == null) {
-          res.status(404).send({ error: "Address counld not be found"});
+        if (aRange == null) {
+          res.status(404).send({ error: "Address could not be found"});
         } else {
+
+          range.name = aRange.name;
+          range.addressNumber = aRange.addressNumber;
+          range.street = aRange.street;
+          range.city = aRange.city;
+          range.state = aRange.state;
+          range.zip = aRange.zip;
+          range.loc = aRange.loc;
+          range.phone = aRange.phone;
+          range.rangetype = aRange.rangetype;
+          range.stalls = aRange.stalls;
+          range.loc = aRange.loc;
 
           return range.save(function(err){
             if (!err) {
@@ -179,12 +206,10 @@ var createRange = function(req, georesult) {
     name : req.body.name,
     addressNumber : result.streetNumber,
     street : result.streetName,
-    addressNumber : req.body.addressNumber,
-    street : req.body.street,
     city : result.city,
     state : req.body.state,
     zip : result.zipcode,
-    loc : [result.longitude, result.latitude],
+    loc : { type: 'Point', coordinates: [parseFloat(result.longitude), parseFloat(result.latitude)] },
     phone : req.body.phone,
     rangetype : req.body.rangetype,
     stalls : req.body.stalls
