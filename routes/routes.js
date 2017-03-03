@@ -46,6 +46,7 @@ module.exports = function(app, passport) {
     // we will want this protected so you have to be logged in to visit
     // we will use route middleware to verify this (the isLoggedIn function)
     app.get('/profile', isLoggedIn, function(req, res) {
+      console.log(req.user);
         res.render('profile.ejs', {
             user : req.user, // get the user out of session and pass to template
             title: 'My Range Wait'
@@ -55,7 +56,6 @@ module.exports = function(app, passport) {
     // =====================================
     // RANGEMENU SECTION =====================
     // =====================================
-    // we will want this protected so you have to be logged in to visit
     // we will use route middleware to verify this (the isLoggedIn function)
     app.get('/rangemenu', function(req, res) {
         res.render('rangemenu.ejs', {
@@ -67,7 +67,6 @@ module.exports = function(app, passport) {
     // =====================================
     // RANGEMENU SECTION =====================
     // =====================================
-    // we will want this protected so you have to be logged in to visit
     // we will use route middleware to verify this (the isLoggedIn function)
     app.get('/about', function(req, res) {
         res.render('about.ejs', {
@@ -149,8 +148,8 @@ module.exports = function(app, passport) {
 
   // local -----------------------------------
   app.get('/unlink/local', function(req, res) {
-      var user            = req.user;
-      user.local.email    = undefined;
+      var user = req.user;
+      user.local.email = undefined;
       user.local.password = undefined;
       user.save(function(err) {
           res.redirect('/profile');
@@ -169,7 +168,7 @@ module.exports = function(app, passport) {
 
   // twitter --------------------------------
   app.get('/unlink/twitter', function(req, res) {
-      var user           = req.user;
+      var user = req.user;
       user.twitter.token = undefined;
       user.save(function(err) {
          res.redirect('/profile');
@@ -184,6 +183,13 @@ module.exports = function(app, passport) {
       res.redirect('/');
   });
 
+  app.post('/isLoggedin', function(req,res) {
+    if (req.isAuthenticated()) {
+      return res.status(200).send({state: 'success',  user: req.user });
+    } else {
+      return res.status(200).send({state: 'failure', user: null });
+    }
+  });
 
 };
 

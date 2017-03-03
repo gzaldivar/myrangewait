@@ -4,7 +4,8 @@ var urlencode = require('urlencode');
 var nodeGeocoder = require('node-geocoder');
 
 var mongoose = require('mongoose');
-var Gunrange = require('../models/gunrange.js');
+var Gunrange = require('../models/gunrange');
+var Blog = require('../models/blog');
 
 var options = {
   provider: 'google',
@@ -124,13 +125,13 @@ router.post('/', function(req, res, next) {
       var range = createRange(req, georesult);
 
       if (range == null) {
-        res.status(404).send({ error: "Address counld not be found"});
+        res.status(200).send({ error: "Error - Address could not be found"});
       } else {
 
         Gunrange.create(range, function (err, post) {
           if (err) {
             console.log(err);
-            res.status(404).send({ error: err.errmsg });
+            res.status(200).send({ error: "Error - " + err.message });
           } else {
             res.json(post);
           }
@@ -162,12 +163,14 @@ router.put('/:id', function(req, res, next) {
           range.street = aRange.street;
           range.city = aRange.city;
           range.state = aRange.state;
+          range.county = aRange.county;
           range.zip = aRange.zip;
           range.loc = aRange.loc;
           range.phone = aRange.phone;
           range.rangetype = aRange.rangetype;
           range.stalls = aRange.stalls;
           range.loc = aRange.loc;
+          range.user = aRange.user;
 
           return range.save(function(err){
             if (!err) {
@@ -184,6 +187,26 @@ router.put('/:id', function(req, res, next) {
   })
 });
 
+/* DELETE /Gunrange/:id */
+router.delete('/:id', function(req, res, next) {
+  Gunrange.findByIdAndRemove(req.params.id, req.body, function (err, post) {
+    if (err) return next(err);
+    res.json(post);
+  });
+});
+
+// Route to post a comment
+router.post('/blog', function(req, res, next) {
+  Blog.create(req.body, function (err, post) {
+    if (err) {
+      console.log(err);
+      res.status(200).send({ error: "Error - " + err.message });
+    } else {
+      res.json(post);
+    }
+  });
+});
+
 var createRange = function(req, georesult) {
   var result = null;
 
@@ -194,8 +217,12 @@ var createRange = function(req, georesult) {
         break;
       }
     }
-  } else if (georesult[0].countryCode === "US") {
-    result = georesult[0];
+  } else if (georesult.length == 1) {
+    if (georesult[0].countryCode === "US") {
+      result = georesult[0];
+    } else {
+      return null;
+    }
   }
 
   if (result == null) {
@@ -207,21 +234,15 @@ var createRange = function(req, georesult) {
     addressNumber : result.streetNumber,
     street : result.streetName,
     city : result.city,
-    state : req.body.state,
+    state : result.administrativeLevels.level1short,
+    county: result.administrativeLevels.level2long,
     zip : result.zipcode,
     loc : { type: 'Point', coordinates: [parseFloat(result.longitude), parseFloat(result.latitude)] },
     phone : req.body.phone,
     rangetype : req.body.rangetype,
-    stalls : req.body.stalls
+    stalls : req.body.stalls,
+    user : req.body.user
   }
 }
-
-/* DELETE /Gunrange/:id */
-router.delete('/:id', function(req, res, next) {
-  Gunrange.findByIdAndRemove(req.params.id, req.body, function (err, post) {
-    if (err) return next(err);
-    res.json(post);
-  });
-});
 
 module.exports = router;

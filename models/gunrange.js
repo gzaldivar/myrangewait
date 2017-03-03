@@ -1,12 +1,6 @@
 var mongoose = require('mongoose');
 
-var Poster = new mongoose.Schema({
-  postedby: String,
-  waittime: Number,
-  lastUpdate: { type: Date, default: Date.now },
-});
-
-var GunStall = new mongoose.Schema({
+var GunStallSchema = new mongoose.Schema({
   type : { type: String, enum: ['Pistol', 'Rifle', 'Shotgun'] },
   numberofstalls : Number,
   length: Number
@@ -18,6 +12,7 @@ var GunRangeSchema = new mongoose.Schema({
   street: String,
   city: String,
   state: { type: String, required: true },
+  county: String,
   zip: String,
   loc: {
     type: { type: String, default: 'Point' },
@@ -28,9 +23,9 @@ var GunRangeSchema = new mongoose.Schema({
 //  number: Number,
   phone: { type: String, default: "(000) 000-0000" },
   rangetype: { type: String, enum: ['Indoor', 'Outdoor'] },
-  waitposts : [Poster],
-  stalls: [GunStall],
+  stalls: [GunStallSchema],
   note: String,
+  user: String,
   updated_at: { type: Date, default: Date.now },
 });
 

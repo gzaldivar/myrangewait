@@ -6,6 +6,10 @@ var mongoose = require('mongoose');
 
 var server = require('../app');
 var Gunrange = require('../models/gunrange');
+var User = require('../models/user');
+var Blog = require('../models/blog');
+
+var user;
 
 var should = chai.should();
 chai.use(chaiHttp);
@@ -43,10 +47,17 @@ describe('Gunranges', function() {
       loc: { type: 'Point', coordinates: [ parseFloat(-117.6022222), parseFloat(33.6408333) ] }
     });
 
+    user = new User({
+      email : "gzaldivar@icloud.com",
+      password : "Apollo"
+    })
 
-    Range1.save(function(err) {
-      Range2.save(function(err) {
-        done();
+    user.save(function(err, user) {
+      Range1.user = user._id;
+      Range1.save(function(err) {
+        Range2.save(function(err) {
+          done();
+        })
       })
     });
 
@@ -253,6 +264,30 @@ describe('Gunranges', function() {
         res.body[0].phone.should.equal('949-632-6440');
         res.body[0].rangetype.should.equal('Outdoor');
         res.body[1].name.should.equal('The Killer');
+        done();
+    });
+  });
+
+  it('should add a SINGLE post on /gunrange/blog POST', function(done) {
+    chai.request(server)
+      .post('/gunrange/blog')
+      .send({
+        user : user._id,
+        postedby: "Christian",
+        waittime: 10,
+        })
+      .end(function(err, res){
+        console.log(res.body);
+        res.should.have.status(200);
+        res.should.be.json;
+        res.body.should.be.a('object');
+        res.body.should.have.property('user');
+        res.body.should.have.property('postedby');
+        res.body.should.have.property('_id');
+        res.body.should.have.property('waittime');
+        res.body.should.have.property('lastUpdate');
+        res.body.postedby.should.equal("Christian");
+        res.body.waittime.should.equal(10);
         done();
     });
   });
