@@ -1,5 +1,141 @@
 <div class="container-fluid">
   <div class="row">
-    <h2 class="text-primary">{{ range.name }}</h2>
-    <h2 class="text-primary">{{ range.addressNumber + " " + range.street }}</h2>
-</div>
+    <div class="col-xs-12 col-sm-6 col-md-8">
+      <h2>Range Information</h2>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-2 col-sm-1 col-md-2">
+      <h4>Name:</h4>
+    </div>
+    <div class="col-xs-6 col-sm-2 col-md-3">
+      <h4 class="text-primary">{{ range.name }}</h4>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-2 col-sm-1 col-md-2">
+      <h4>Address:</h4>
+    </div>
+    <div class="col-xs-6 col-sm-2 col-md-3">
+      <h4 class="text-primary">{{ range.addressNumber + " " + range.street }}</h4>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-2 col-sm-1 col-md-2">
+      <h4>City:</h4>
+    </div>
+    <div class="col-xs-6 col-sm-2 col-md-3">
+      <h4 class="text-primary">{{ range.city }}</h4>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-2 col-sm-1 col-md-2">
+      <h4>County:</h4>
+    </div>
+    <div class="col-xs-6 col-sm-2 col-md-3">
+      <h4 class="text-primary">{{ range.county }}</h4>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-2 col-sm-1 col-md-2">
+      <h4>State:</h4>
+    </div>
+    <div class="col-xs-6 col-sm-2 col-md-3">
+      <h4 class="text-primary">{{ range.stateobj.name }}</h4>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-2 col-sm-1 col-md-2">
+      <h4>Zip:</h4>
+    </div>
+    <div class="col-xs-6 col-sm-2 col-md-3">
+      <h4 class="text-primary">{{ range.zip }}</h4>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-2 col-sm-1 col-md-2">
+      <h4>Phone:</h4>
+    </div>
+    <div class="col-xs-6 col-sm-2 col-md-3">
+      <h4 class="text-primary">{{ range.phone }}</h4>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-2 col-sm-1 col-md-2">
+      <h4>Range Type:</h4>
+    </div>
+    <div class="col-xs-6 col-sm-2 col-md-3">
+      <h4 class="text-primary">{{ range.rangetype }}</h4>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-2 col-sm-1 col-md-2">
+      <h4>Website:</h4>
+    </div>
+    <div class="col-xs-6 col-sm-2 col-md-3">
+      <h4 class="text-primary">{{ range.url }}</h4>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-2 col-sm-1 col-md-2">
+      <div ng-if="range.allstalls">
+        <h4>Shooting Positions:</h4>
+      </div>
+      <div ng-if="range.pistolstalls">
+        <h4>Pistol Positions:</h4>
+      </div>
+    </div>
+    <div class="col-xs-2 col-sm-1 col-md-2">
+      <div ng-if="range.allstalls">
+        <h4 class="text-primary">{{ range.allstalls }}</h4>
+      </div>
+      <div ng-if="range.pistolstalls">
+        <h4 class="text-primary">{{ range.pistolstalls }}</h4>
+      </div>
+    </div>
+    <div class="col-xs-2 col-sm-1 col-md-2">
+      <div ng-if="range.allstalls">
+        <h4>Length (ft):</h4>
+      </div>
+      <div ng-if="range.pistolstalls">
+        <h4>Length (ft):</h4>
+      </div>
+    </div>
+    <div class="col-xs-2 col-sm-1 col-md-2">
+      <div ng-if="range.allstalls">
+        <h4 class="text-primary">{{ range.allStallLength }}</h4>
+      </div>
+      <div ng-if="range.pistolstalls">
+        <h4 class="text-primary">{{ range.pistolStallLength }}</h4>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-2 col-sm-1 col-md-2">
+      <div ng-if="range.riflestalls">
+        <h4>Length (ft):</h4>
+      </div>
+    </div>
+    <div class="col-xs-2 col-sm-1 col-md-2">
+      <div ng-if="range.riflestalls">
+        <h4 class="text-primary">{{ range.rifleStallLength }}</h4>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-2 col-sm-1 col-md-2">
+      <div ng-if="range.shotgunstalls">
+        <h4>Length (ft):</h4>
+      </div>
+    </div>
+    <div class="col-xs-2 col-sm-1 col-md-2">
+      <div ng-if="range.riflestalls">
+        <h4 class="text-primary">{{ range.shotgunStallLength }}</h4>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12 col-sm-6 col-md-8">
+      <h2 class="text-primary">Comments</h2>
+    </div>
+  </div>

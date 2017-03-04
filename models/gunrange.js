@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 
 var GunStallSchema = new mongoose.Schema({
-  type : { type: String, enum: ['Pistol', 'Rifle', 'Shotgun'] },
+  type : { type: String, enum: ['Pistol', 'Rifle', 'Shotgun', 'All'] },
   numberofstalls : Number,
   length: Number
 });
@@ -26,6 +26,7 @@ var GunRangeSchema = new mongoose.Schema({
   stalls: [GunStallSchema],
   note: String,
   user: String,
+  url: String,
   updated_at: { type: Date, default: Date.now },
 });
 

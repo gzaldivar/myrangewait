@@ -8,7 +8,6 @@ function($scope, $rootScope, $http, $location, $q, rangeResults, statesList, isL
 
   rangeResults.refreshSearchResults(function(results) {
     $scope.searchresults = results;
-
   })
 
   $scope.errorMessage = "Enter Search Criteria";
@@ -108,6 +107,7 @@ function($scope, $rootScope, $http, $location, $q, rangeResults, statesList, isL
             if (response.data.error) {
               $scope.errorMessage = response.data.error;
             } else {
+              rangeResults.addResults($scope.range);
               $location.url('/search');
             }
           } else {
@@ -152,6 +152,9 @@ function($scope, $rootScope, $http, $location, $q, rangeResults, statesList, isL
         } else if (range.stalls[i].type === "Shotgun") {
           $scope.range.shotgunstalls = range.stalls[i].numberofstalls;
           $scope.range.shotgunStallLength = range.stalls[i].length;
+        } else {
+          $scope.range.allstalls = range.stalls[i].numberofstalls;
+          $scope.range.allStallLength = range.stalls[i].length;
         }
       }
     }
@@ -175,7 +178,7 @@ function($scope, $rootScope, $http, $location, $q, rangeResults, statesList, isL
       })
       .then(function(response) {
         if (response.status == 200) {
-  //          $scope.searchresults = rangeResults.addResults($scope.range);
+          rangeResults.addResults($scope.range);
           $location.url('/search');
         } else if (response.status == 404) {
           $scope.errorMessage = response.error;
@@ -204,8 +207,28 @@ function($scope, $rootScope, $http, $location, $q, rangeResults, statesList, isL
 
 }])
 
-.controller('showRangeDetailsController', ['$scope', '$rootScope', '$stateParams', 'rangeResults',
-  function($scope, $rootScope, $stateParams, rangeResults) {
+.controller('showRangeDetailsController', ['$scope', '$rootScope', '$stateParams', 'rangeResults', 'statesList',
+  function($scope, $rootScope, $stateParams, rangeResults, statesList) {
     var range = rangeResults.getResultById($stateParams.rangeid);
     $scope.range = range;
+    $scope.range.stateobj = statesList.getSelectedState($scope.range.state);
+
+    if (range.stalls) {
+      for (i = 0; i < range.stalls.length; i++) {
+        if (range.stalls[i].type === "Pistol") {
+          $scope.range.pistolstalls = range.stalls[i].numberofstalls;
+          $scope.range.pistolStallLength = range.stalls[i].length;
+        } else if (range.stalls[i].type === "Rifle") {
+          $scope.range.riflestalls = range.stalls[i].numberofstalls;
+          $scope.range.rifleStallLength = range.stalls[i].length;
+        } else if (range.stalls[i].type === "Shotgun") {
+          $scope.range.shotgunstalls = range.stalls[i].numberofstalls;
+          $scope.range.shotgunStallLength = range.stalls[i].length;
+        } else {
+          $scope.range.allstalls = range.stalls[i].numberofstalls;
+          $scope.range.allStallLength = range.stalls[i].length;
+        }
+      }
+    }
+    
 }]);

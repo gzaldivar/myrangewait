@@ -354,31 +354,41 @@ angular.module('routerApp').factory('isLoggedInFactory', ['$http', function($htt
   var rangestalls = function(range) {
     var stalls = [];
 
-    if (range.pistolstalls) {
+    if (range.allstalls) {
       var entry = {
-        type: "Pistol",
-        numberofstalls: range.pistolstalls,
-        length: range.pistolStallLength
-    }
+        type: "All",
+        numberofstalls: range.allstalls,
+        length: range.allStallLength
+      }
       stalls.push(entry);
-    }
 
-    if (range.riflestalls) {
-      var entry = {
-        type: "Rifle",
-        numberofstalls: range.riflestalls,
-        length: range.rifleStallLength
-    }
-      stalls.push(entry);
-    }
+    } else {
+      if (range.pistolstalls) {
+        var entry = {
+          type: "Pistol",
+          numberofstalls: range.pistolstalls,
+          length: range.pistolStallLength
+        }
+        stalls.push(entry);
+      }
 
-    if (range.shotgunstalls) {
-      var entry = {
-        type: "Shotgun",
-        numberofstalls: range.shotgunstalls,
-        length: range.shotgunStallLength
-    }
-      stalls.push(entry);
+      if (range.riflestalls) {
+        var entry = {
+          type: "Rifle",
+          numberofstalls: range.riflestalls,
+          length: range.rifleStallLength
+        }
+        stalls.push(entry);
+      }
+
+      if (range.shotgunstalls) {
+        var entry = {
+          type: "Shotgun",
+          numberofstalls: range.shotgunstalls,
+          length: range.shotgunStallLength
+        }
+        stalls.push(entry);
+      }
     }
 
     return stalls;

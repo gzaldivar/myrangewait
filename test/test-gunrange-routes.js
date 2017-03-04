@@ -52,11 +52,20 @@ describe('Gunranges', function() {
       password : "Apollo"
     })
 
+    var blog = new Blog({
+      waittime : 15,
+      comment : "Cool range!"
+    })
+
     user.save(function(err, user) {
       Range1.user = user._id;
-      Range1.save(function(err) {
-        Range2.save(function(err) {
-          done();
+      Range1.save(function(err, range1) {
+        blog.user = user._id;
+        blog.gunrange = range1._id;
+        blog.save(function(err, blog) {
+          Range2.save(function(err) {
+            done();
+          })
         })
       })
     });
@@ -65,6 +74,8 @@ describe('Gunranges', function() {
 
   afterEach(function(done){
     Gunrange.collection.drop();
+    Blog.collection.drop();
+    User.collection.drop()
     done();
   });
 
@@ -268,28 +279,92 @@ describe('Gunranges', function() {
     });
   });
 
-  it('should add a SINGLE post on /gunrange/blog POST', function(done) {
+  it('should list ALL blogs on /blog GET', function(done) {
+
     chai.request(server)
-      .post('/gunrange/blog')
-      .send({
-        user : user._id,
-        postedby: "Christian",
-        waittime: 10,
-        })
+      .get('/blog')
       .end(function(err, res){
         console.log(res.body);
         res.should.have.status(200);
         res.should.be.json;
-        res.body.should.be.a('object');
-        res.body.should.have.property('user');
-        res.body.should.have.property('postedby');
-        res.body.should.have.property('_id');
-        res.body.should.have.property('waittime');
-        res.body.should.have.property('lastUpdate');
-        res.body.postedby.should.equal("Christian");
-        res.body.waittime.should.equal(10);
+        res.body.should.be.a('array');
+        res.body[0].should.have.property('_id');
+        res.body[0].should.have.property('waittime');
+        res.body[0].should.have.property('user');
+        res.body[0].should.have.property('gunrange');
+        res.body[0].should.have.property('comment');
+        res.body[0].waittime.should.equal(15);
+        res.body[0].comment.should.equal("Cool range!");
         done();
     });
   });
 
+  it('should add a SINGLE post on /blog POST', function(done) {
+    chai.request(server)
+      .get('/gunrange')
+      .end(function(err, data){
+        chai.request(server)
+          .post('/blog')
+          .send({
+            user : user._id,
+            gunrange: data.body[0]._id,
+            waittime: 10,
+            comment: "Cool range!"
+            })
+          .end(function(err, res){
+            console.log(res.body);
+            res.should.have.status(200);
+            res.should.be.json;
+            res.body.should.be.a('object');
+            res.body.should.have.property('user');
+            res.body.should.have.property('gunrange');
+            res.body.should.have.property('_id');
+            res.body.should.have.property('waittime');
+            res.body.should.have.property('lastUpdate');
+            res.body.waittime.should.equal(10);
+            res.body.comment.should.equal("Cool range!");
+            done();
+        });
+      });
+  });
+
+  it('should get blogs for a gunrange ordered by date', function(done) {
+    chai.request(server)
+      .get('/gunrange')
+      .end(function(err, data){
+        chai.request(server)
+        .get('/blog/search/gunrange?gunrange=' + data.body[0]._id)
+        .end(function(err, res) {
+          console.log(res.body);
+          res.should.have.status(200);
+          res.should.be.json;
+          res.body.should.be.a('array');
+          res.body[0].should.have.property('user');
+          res.body[0].should.have.property('gunrange');
+          res.body[0].should.have.property('_id');
+          res.body[0].should.have.property('waittime');
+          res.body[0].should.have.property('lastUpdate');
+          res.body[0].waittime.should.equal(15);
+          res.body[0].comment.should.equal("Cool range!");
+          done();
+        });
+      });
+  });
+
+  it('should delete a SINGLE blog on /blog/<id> DELETE', function(done) {
+    chai.request(server)
+      .get('/blog')
+      .end(function(err, res){
+        chai.request(server)
+          .delete('/blog/'+res.body[0]._id)
+          .end(function(error, response){
+            response.should.have.status(200);
+            response.should.be.json;
+            response.body.should.be.a('object');
+            response.body.should.have.property('_id');
+            done();
+      });
+    });
+
+  });
 });

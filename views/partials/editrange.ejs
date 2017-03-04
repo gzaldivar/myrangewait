@@ -92,6 +92,15 @@
     </div>
   <p>
     <div class="row">
+      <div class="col-xs-2 col-sm-1 col-md-2">
+        <label for="Website">Website:</label>
+      </div>
+      <div class="col-xs-4 col-sm-2 col-md-3">
+        <input type="text"  name="url" ng-model="range.url" class="form-control" placeholder="http://">
+      </div>
+    </div>
+    <p>
+    <div class="row">
       <div class="col-xs-12 col-sm-6 col-md-8">
         <h3 class="text-primary">Enter number of shooting positions and length in feet.</h3>
       </div>
@@ -138,18 +147,27 @@
         <input type="text" ng-model="range.shotgunStallLength" class="form-control" maxlength="3" ng-keypress="numberValue($event)">
       </div>
     </div>
-    <div class="row">
+    <div class= "row">
       <div class="col-xs-12 col-sm-6 col-md-8">
-        <h3 class="text-info">Enter number of positions if all positions are used for all firearms.</h3>
+        <h3 class="text-info">Or .... Enter the total number of stalls if they are used for all firearms.</h3>
       </div>
     </div>
     <p>
     <div class="row">
       <div class="col-xs-2 col-sm-1 col-md-2">
-        <label for="Positions">Positions:</label>
+        <label for="All">All:</label>
       </div>
       <div class="col-xs-1 col-sm-1 col-md-1">
         <input type="text" ng-model="range.allstalls" class="form-control" maxlength="3" ng-keypress="numberValue($event)">
+      </div>
+    </div>
+    <p>
+    <div class="row">
+      <div class="col-xs-2 col-sm-1 col-md-2">
+        <label for="AllStallLength">All (ft):</label>
+      </div>
+      <div class="col-xs-1 col-sm-1 col-md-1">
+        <input type="text" ng-model="range.allStallLength" class="form-control" maxlength="3" ng-keypress="numberValue($event)">
       </div>
     </div>
   </div>

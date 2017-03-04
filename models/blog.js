@@ -2,8 +2,9 @@ var mongoose = require('mongoose');
 
 var BlogSchema = new mongoose.Schema({
   user : String,
-  postedby: String,
+  gunrange: String,
   waittime: Number,
+  comment: String,
   lastUpdate: { type: Date, default: Date.now },
 });
 

@@ -33,6 +33,7 @@ require('./config/passport')(passport); // pass passport for configuration
 var index = require('./routes/index');
 var users = require('./routes/users');
 var gunrange = require('./routes/gunrange');
+var blog = require('./routes/blog');
 
 mongoose.Model.on('index', function(err) {
   if (err) logger.error(err);
@@ -81,6 +82,7 @@ require('./routes/routes.js')(app, passport); // load our routes and pass in our
 app.use('/', index);
 app.use('/users', users);
 app.use('/gunrange', gunrange);
+app.use('/blog', blog);
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");

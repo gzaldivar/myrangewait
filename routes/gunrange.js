@@ -5,7 +5,6 @@ var nodeGeocoder = require('node-geocoder');
 
 var mongoose = require('mongoose');
 var Gunrange = require('../models/gunrange');
-var Blog = require('../models/blog');
 
 var options = {
   provider: 'google',
@@ -171,6 +170,7 @@ router.put('/:id', function(req, res, next) {
           range.stalls = aRange.stalls;
           range.loc = aRange.loc;
           range.user = aRange.user;
+          range.url = aRange.url;
 
           return range.save(function(err){
             if (!err) {
@@ -192,18 +192,6 @@ router.delete('/:id', function(req, res, next) {
   Gunrange.findByIdAndRemove(req.params.id, req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);
-  });
-});
-
-// Route to post a comment
-router.post('/blog', function(req, res, next) {
-  Blog.create(req.body, function (err, post) {
-    if (err) {
-      console.log(err);
-      res.status(200).send({ error: "Error - " + err.message });
-    } else {
-      res.json(post);
-    }
   });
 });
 
@@ -241,7 +229,8 @@ var createRange = function(req, georesult) {
     phone : req.body.phone,
     rangetype : req.body.rangetype,
     stalls : req.body.stalls,
-    user : req.body.user
+    user : req.body.user,
+    url : req.body.url
   }
 }
 
