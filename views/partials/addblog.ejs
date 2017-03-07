@@ -1,0 +1,26 @@
+<div class="row">
+  <h2 class="text-primary">Add Comment</h2>
+</div>
+<div class="row">
+  <ng-form name="addrange" novalidate>
+    <div class="row">
+      <div class="col-xs-2 col-sm-1 col-md-2">
+        <label for="Comment">Comment:</label>
+      </div>
+      <div class="col-xs-4 col-sm-2 col-md-3">
+        <input type="text" ng-model="blog.comment" class="form-control" required>
+      </div>
+    </div>
+    <p>
+    <p>
+    <div class="row">
+      <div class="col-xs-2 col-sm-1 col-md-2">
+        <button class="btn btn-primary btn-lg" ng-click="addnewblog(blog)" >Submit</button>
+      </div>
+      <div class="col-xs-2 col-sm-1 col-md-2">
+        <button ui-sref="showrange({rangeid: rangeid})" class="btn btn-info btn-lg">Back</a>
+      </div>
+      
+    </div>
+  </ng-form>
+</div>

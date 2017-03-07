@@ -2,46 +2,27 @@
     <div class="container-fluid">
 
         <div class="navbar-header">
-          <% if (user) { %>
-            <a class="navbar-brand" href="/rangemenu">
-              <span class="glyphicon glyphicon glyphicon-tree-deciduous"></span>
-              <%= title %>
-            </a>
-          <% } else { %>
-            <a class="navbar-brand" href="/">
-              <span class="glyphicon glyphicon glyphicon-tree-deciduous"></span>
-              <%= title %>
-            </a>
-          <% } %>
+            <div ng-if="!!user">
+              <a class="navbar-brand" ui-sref="search">{{ title }}</a>
+            </div>
+            <div ng-if="!user"}>
+              <a class="navbar-brand" ui-sref="home">{{ title }}</a>
+            </div>
+
+
         </div>
 
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li><a href="/rangemenu">Menu</a></li>
-            <li><a href="/about">About</a></li>
+            <li><a ui-sref="search" ng-show="user">Menu</a></li>
+            <li><a ui-sref="about">About</a></li>
           </ul>
 
-          <% if ( user != null) { %>
-            <ul class="nav navbar-nav navbar-right">
-              <ul class="nav navbar-nav">
-                <li><a href="/logout">Logout</a></li>
-              </ul>
-              <!--li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><%= user.facebook.name %><span class="caret"></span></a>
-                <ul class="dropdown-menu">
-                  <li><a href="#">Logout</a></li>
-                </ul>
-              </li-->
+          <ul class="nav navbar-nav navbar-right">
+            <ul class="nav navbar-nav">
+              <li><a ng-show="user" ui-sref="profile" ng-click="userprofile()">{{ username }}</a></li>
             </ul>
-          <% } %>
-      </div>
+          </ul>
+       </div>
     </div>
 </nav>
-<div class="container-fluid">
-  <div class="row>">
-    <div class="col-xs-12 col-sm-6 col-md-8"></div>
-    <div class="col-xs-6 col-md-4">
-      <% include usertest %>
-    </div>
-  </div>
-</div>

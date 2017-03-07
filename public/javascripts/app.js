@@ -16,17 +16,45 @@ angular.module('routerApp', ['ui.router'])
         });
       };
 
-      $rootScope.loggedIn();
+//      $rootScope.loggedIn();
+      $rootScope.title = "My Range Wait";
   })
 
   .config(function($stateProvider, $urlRouterProvider) {
 
-    $urlRouterProvider.otherwise('/search');
+    $urlRouterProvider.otherwise('/home');
 
     $stateProvider
+      .state('login', {
+        url: '/login',
+        templateUrl: 'partials/login.ejs',
+        controller: 'loginController'
+      })
+      .state('logout', {
+        url: '/logout',
+        templateUrl: 'partials/home',
+        controller: 'loginController'
+      })
+      .state('signup', {
+        url: '/signup',
+        templateUrl: 'partials/signup.ejs',
+        controller: 'loginController'
+      })
       .state('home', {
         url: '/home',
-        templateUrl: 'partials/rangemenuoptions.ejs'
+        templateUrl: 'partials/home.ejs',
+        controller: function($scope, $rootScope) {
+                $scope.title = $rootScope.title;
+            }
+      })
+      .state('profile', {
+        url: '/profile',
+        templateUrl: 'partials/profile.ejs',
+        controller: 'loginController'
+      })
+      .state('about', {
+        url: '/about',
+        templateUrl: 'partials/about.ejs'
       })
       .state('search', {
         url: '/search',
@@ -49,6 +77,12 @@ angular.module('routerApp', ['ui.router'])
         url: '/showrange',
         templateUrl: 'partials/showrange.ejs',
         controller: 'showRangeDetailsController',
+        params: { rangeid: null }
+      })
+      .state('addblog', {
+        url: '/addblog',
+        templateUrl: 'partials/addblog.ejs',
+        controller: 'addblogController',
         params: { rangeid: null }
       })
   })

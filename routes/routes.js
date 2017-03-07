@@ -1,3 +1,7 @@
+var jwt = require('jsonwebtoken');
+const expressJwt = require('express-jwt');
+const jwtAuthenticate = expressJwt({secret : 'server secret'});
+
 module.exports = function(app, passport) {
 
     // =====================================
@@ -17,11 +21,31 @@ module.exports = function(app, passport) {
     });
 
     // process the login form
-    app.post('/login', passport.authenticate('local-login', {
-        successRedirect : '/rangemenu', // redirect to the secure profile section
-        failureRedirect : '/login', // redirect back to the signup page if there is an error
-        failureFlash : true // allow flash messages
-    }));
+    app.post('/login', function(req, res, next) {
+      passport.authenticate('local-login', function(err, user, info) {
+        if (err) { return next(err) }
+        if (!user) {
+          res.status(200).json({ status: "failed" });
+        } else {
+
+          //user has authenticated correctly thus we create a JWT token
+          var token = jwt.sign({
+              id: user._id,
+            }, 'server secret', {
+              expiresIn : 60*60*24
+            });
+
+          res.json({ status: "success", token: token, user: user });
+        }
+
+      })(req, res, next);
+    });
+//    {
+//        successRedirect : '/rangemenu', // redirect to the secure profile section
+//        failureRedirect : '/login', // redirect back to the signup page if there is an error
+//        failureFlash : true // allow flash messages
+//    }
+//  ));
 
     // =====================================
     // SIGNUP ==============================
@@ -34,11 +58,22 @@ module.exports = function(app, passport) {
     });
 
     // process the signup form
-    app.post('/signup', passport.authenticate('local-signup', {
-        successRedirect : '/rangemenu', // redirect to the secure profile section
-        failureRedirect : '/signup', // redirect back to the signup page if there is an error
-        failureFlash : true // allow flash messages
-    }));
+    app.post('/signup', function(req, res, next) {
+      passport.authenticate('local-signup', function(err, user, info) {
+        if (err) { return next(err) }
+        if (!user) {
+          res.status(200).json({ status: "failed" });
+        } else {
+          res.json({ status: "success", user: user });
+        }
+
+      })(req, res, next);
+    });
+//    {
+//        successRedirect : '/rangemenu', // redirect to the secure profile section
+//        failureRedirect : '/signup', // redirect back to the signup page if there is an error
+//        failureFlash : true // allow flash messages
+//    }));
 
     // =====================================
     // PROFILE SECTION =====================
@@ -109,6 +144,7 @@ module.exports = function(app, passport) {
     app.get('/connect/local', function(req, res) {
         res.render('connect-local.ejs', { message: req.flash('loginMessage') });
     });
+
     app.post('/connect/local', passport.authenticate('local-signup', {
         successRedirect : '/profile', // redirect to the secure profile section
         failureRedirect : '/connect/local', // redirect back to the signup page if there is an error
@@ -152,7 +188,11 @@ module.exports = function(app, passport) {
       user.local.email = undefined;
       user.local.password = undefined;
       user.save(function(err) {
-          res.redirect('/profile');
+        if (err) {
+          res.json({ status: "error", message: "Error unlinking user" });
+        } else {
+          res.json({ status: "success", message: "User linked!" });
+        }
       });
   });
 
@@ -180,7 +220,7 @@ module.exports = function(app, passport) {
   // =====================================
   app.get('/logout', function(req, res) {
       req.logout();
-      res.redirect('/');
+//      res.redirect('/');
   });
 
   app.post('/isLoggedin', function(req,res) {

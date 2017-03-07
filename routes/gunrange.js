@@ -6,6 +6,9 @@ var nodeGeocoder = require('node-geocoder');
 var mongoose = require('mongoose');
 var Gunrange = require('../models/gunrange');
 
+const expressJwt = require('express-jwt');
+const jwtAuthenticate = expressJwt({secret : 'server secret'});
+
 var options = {
   provider: 'google',
   formatter: null
@@ -23,7 +26,7 @@ router.get('/', function(req, res, next) {
 });
 
 /* GET /gunrange/id */
-router.get('/:id', function(req, res, next) {
+router.get('/:id', jwtAuthenticate, function(req, res, next) {
   var ObjectId = require('mongoose').Types.ObjectId;
   var query = { zip: new ObjectId(req.query.zip) };
   console.log("search by id");
@@ -34,7 +37,7 @@ router.get('/:id', function(req, res, next) {
 });
 
 /* GET /gunrange/name */
-router.get('/search/getbyzip', function(req, res, next) {
+router.get('/search/getbyzip', jwtAuthenticate, function(req, res, next) {
   console.log("zip= ", req.query.zip);
   console.log("distance= ", req.query.distance);
 
@@ -87,7 +90,7 @@ router.get('/search/getbyzip', function(req, res, next) {
 });
 
 /* GET /gunrange/state */
-router.get('/search/state', function(req, res, next) {
+router.get('/search/state', jwtAuthenticate, function(req, res, next) {
   console.log("Search by state");
   var query = new RegExp(urlencode(req.query.state), "i");
   console.log(query);
@@ -101,7 +104,7 @@ router.get('/search/state', function(req, res, next) {
 });
 
 /* GET /gunrange/name */
-router.get('/search/name', function(req, res, next) {
+router.get('/search/name', jwtAuthenticate, function(req, res, next) {
   console.log("Search by name");
   var query = new RegExp(urlencode(req.query.name), "i");
   console.log(query);
@@ -112,7 +115,7 @@ router.get('/search/name', function(req, res, next) {
 });
 
 /* POST /Gunrange */
-router.post('/', function(req, res, next) {
+router.post('/', jwtAuthenticate, function(req, res, next) {
   console.log("adding a range");
   var address = req.body.addressNumber + " " + req.body.street + " " + req.body.city;
 
@@ -141,7 +144,7 @@ router.post('/', function(req, res, next) {
 });
 
 /* PUT /Gunrange/:id */
-router.put('/:id', function(req, res, next) {
+router.put('/:id', jwtAuthenticate, function(req, res, next) {
   return Gunrange.findById(req.params.id, function(err, range){
 
     var address = req.body.addressNumber + " " + req.body.street + " " + req.body.city;
@@ -188,7 +191,7 @@ router.put('/:id', function(req, res, next) {
 });
 
 /* DELETE /Gunrange/:id */
-router.delete('/:id', function(req, res, next) {
+router.delete('/:id', jwtAuthenticate, function(req, res, next) {
   Gunrange.findByIdAndRemove(req.params.id, req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);

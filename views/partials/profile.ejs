@@ -1,0 +1,37 @@
+  <div class="container">
+
+      <div class="page-header text-center">
+          <h1><span class="fa fa-anchor"></span> Profile Page</h1>
+      </div>
+
+      <div class="row">
+
+        <div class="col-sm-6">
+            <div class="well">
+                <h3><span class="fa fa-user"></span> Local</h3>
+
+                <p>
+                <div ng-if="user.local">
+                      <strong>email</strong>: {{ user.local.email }}<br>
+                  <!-- button class="btn btn-default" ng-click="unlink()">Unlink</button>
+                  <button class="btn btn-default" ng-click="link()">Connect Local</button -->
+                </div>
+                <div ng-if="user.facebook">
+                      <strong>email</strong>: {{ user.facebook.email }}<br>
+                      <strong>password</strong>: {{ user.facebook.name }}
+                </div>
+
+                <div ng-if="user.twitter">
+                      <strong>email</strong>: {{ user.twitter.username }}<br>
+                      <strong>password</strong>: {{ user.twitter.displayName }}
+                </div>
+                </p>
+            </div>
+        </div>
+      </div>
+      <p>
+      <div class="row">
+        <a ui-sref="logout" class="btn btn-default btn-md" ng-click="logoutuser()">Logout</a>
+      </div>
+
+    </div>

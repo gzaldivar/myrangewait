@@ -5,8 +5,11 @@ var urlencode = require('urlencode');
 var mongoose = require('mongoose');
 var Blog = require('../models/blog');
 
+const expressJwt = require('express-jwt');
+const jwtAuthenticate = expressJwt({secret : 'server secret'});
+
 // Route to post a comment
-router.post('/', function(req, res, next) {
+router.post('/', jwtAuthenticate, function(req, res, next) {
   Blog.create(req.body, function (err, post) {
     if (err) {
       console.log(err);
@@ -18,7 +21,7 @@ router.post('/', function(req, res, next) {
 });
 
 /* GET /blog/id */
-router.get('/:id', function(req, res, next) {
+router.get('/:id', jwtAuthenticate, function(req, res, next) {
   Blog.findById(req.params.id, function (err, docs) {
     if (err) return next(err);
     res.json(docs);
@@ -26,7 +29,7 @@ router.get('/:id', function(req, res, next) {
 });
 
 /* GET /blog */
-router.get('/', function(req, res, next) {
+router.get('/', jwtAuthenticate, function(req, res, next) {
   Blog.find(function (err, docs) {
     if (err) return next(err);
     res.json(docs);
@@ -34,7 +37,7 @@ router.get('/', function(req, res, next) {
 });
 
 /* GET /blog for Gunrange */
-router.get('/search/gunrange', function(req, res, next) {
+router.get('/search/gunrange', jwtAuthenticate, function(req, res, next) {
   Blog.find({ gunrange: req.query.gunrange }, function (err, docs) {
     if (err) {
       return res.status(200).send({ error: "Error - " + err.message });
@@ -45,7 +48,7 @@ router.get('/search/gunrange', function(req, res, next) {
 });
 
 /* DELETE /Blog/:id */
-router.delete('/:id', function(req, res, next) {
+router.delete('/:id', jwtAuthenticate, function(req, res, next) {
   Blog.findByIdAndRemove(req.params.id, req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);

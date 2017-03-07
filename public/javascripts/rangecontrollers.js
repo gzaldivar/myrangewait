@@ -1,9 +1,11 @@
 
-angular.module('routerApp').controller('rangesearchController', ['$scope', '$rootScope', '$http', '$location', '$q', 'rangeResults', 'statesList', 'isLoggedInFactory',
-function($scope, $rootScope, $http, $location, $q, rangeResults, statesList, isLoggedInFactory) {
+angular.module('routerApp').controller('rangesearchController', ['$scope', '$rootScope', '$http', '$location', 'rangeResults', 'statesList', 'isLoggedInFactory',
+function($scope, $rootScope, $http, $location, rangeResults, statesList, isLoggedInFactory) {
 
 //    isLoggedInFactory.getUser(function(user) {
       $scope.user = $rootScope.user;
+      $scope.username = $rootScope.username;
+      $scope.title = $rootScope.title;
 //    })
 
   rangeResults.refreshSearchResults(function(results) {
@@ -83,6 +85,7 @@ function($scope, $rootScope, $http, $location, $q, rangeResults, statesList, isL
 .controller('addRangeController', ['$scope', '$http', '$rootScope', '$location', 'rangeResults', 'statesList', 'stallPositionFactory', function(
   $scope, $http, $rootScope, $location, rangeResults, statesList, stallPositionFactory) {
 
+    $scope.title = $rootScope.title;
     $scope.errorMessage = "Enter range information below ......";
     $scope.states = statesList.getStateList();
     $scope.rangetypes = ['Indoor', 'Outdoor'];
@@ -100,6 +103,7 @@ function($scope, $rootScope, $http, $location, $q, rangeResults, statesList, isL
         $http({
           url: __env.apiUrl + "gunrange",
           method: "POST",
+          headers: { "Authorization": 'Bearer ' + $rootScope.token },
           data:  $scope.range
         })
         .then(function(response) {
@@ -124,6 +128,7 @@ function($scope, $rootScope, $http, $location, $q, rangeResults, statesList, isL
 .controller('editRangeController', ['$scope', '$rootScope', '$stateParams', '$http', '$location', 'rangeResults', 'statesList', 'stallPositionFactory',
   function($scope, $rootScope, $stateParams, $http, $location, rangeResults, statesList, stallPositionFactory) {
 
+  $scope.title = $rootScope.title;
   $scope.errorMessage = "Update Range Information"
   var range = rangeResults.getResultById($stateParams.rangeid);
 
@@ -174,6 +179,7 @@ function($scope, $rootScope, $http, $location, $q, rangeResults, statesList, isL
       $http({
         url: __env.apiUrl + "gunrange/" + rangeid,
         method: "PUT",
+        headers: { "Authorization": 'Bearer ' + $rootScope.token },
         data:  $scope.range
       })
       .then(function(response) {
@@ -194,7 +200,8 @@ function($scope, $rootScope, $http, $location, $q, rangeResults, statesList, isL
   $scope.deleteRange = function(rangeid) {
     $http({
       url: __env.apiUrl + "gunrange/" + rangeid,
-      method: "DELETE"
+      method: "DELETE",
+      headers: { "Authorization": 'Bearer ' + $rootScope.token }
     })
     .then(function(response) {
       if (response.status == 200) {
@@ -207,9 +214,12 @@ function($scope, $rootScope, $http, $location, $q, rangeResults, statesList, isL
 
 }])
 
-.controller('showRangeDetailsController', ['$scope', '$rootScope', '$stateParams', 'rangeResults', 'statesList',
-  function($scope, $rootScope, $stateParams, rangeResults, statesList) {
+.controller('showRangeDetailsController', ['$scope', '$rootScope', '$stateParams', 'rangeResults', 'statesList', 'blogFactory',
+  function($scope, $rootScope, $stateParams, rangeResults, statesList, blogFactory) {
+
+    $scope.title = $rootScope.title;
     var range = rangeResults.getResultById($stateParams.rangeid);
+
     $scope.range = range;
     $scope.range.stateobj = statesList.getSelectedState($scope.range.state);
 
@@ -230,5 +240,36 @@ function($scope, $rootScope, $http, $location, $q, rangeResults, statesList, isL
         }
       }
     }
-    
-}]);
+
+    blogFactory.getBlogs(range._id, function(err, result) {
+      if (err) {
+        alert(err.message);
+      } else {
+        $scope.blogs = result;
+      }
+    })
+
+    $scope.user = $rootScope.user;
+  }])
+
+  .controller('addblogController', ['$scope', '$rootScope', '$stateParams', 'blogFactory',
+  function($scope, $rootScope, $stateParams, blogFactory) {
+
+    $scope.title = $rootScope.title;
+    $scope.rangeid = $stateParams.rangeid;
+
+    $scope.addnewblog = function(blog) {
+      $scope.blog = {
+        user : $rootScope.user._id,
+        username : $rootScope.username,
+        waittime : $scope.blog.waittime,
+        comment : $scope.blog.comment,
+        gunrange : $stateParams.rangeid
+      };
+
+      blogFactory.createBlog(blog , function(aBlog) {
+        $location.url('/showrange');
+      })
+    }
+
+  }]);

@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 
 var BlogSchema = new mongoose.Schema({
   user : String,
+  username: String,
   gunrange: String,
   waittime: Number,
   comment: String,

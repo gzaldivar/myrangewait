@@ -79,6 +79,10 @@ describe('Gunranges', function() {
     done();
   });
 
+  if ('should be able to sign up a new user', function(done) {
+
+  });
+
   it('should list ALL gunranges on /gunrange GET', function(done) {
 
     chai.request(server)

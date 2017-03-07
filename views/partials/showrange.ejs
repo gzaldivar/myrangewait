@@ -138,4 +138,24 @@
     <div class="col-xs-12 col-sm-6 col-md-8">
       <h2 class="text-primary">Comments</h2>
     </div>
+    <div class="col-xs-6 col-md-4">
+      <button ui-sref="addblog({rangeid: range._id})" class="btn btn-primary btn-md" ng-show="user">Add Comment</button>
+    </div>
+  </div>
+  <div class="row">
+    <table class="table table-striped table-bordered">
+      <tr>
+        <th>Name</th>
+        <th>Wait Time - Minutes</th>
+        <th>Updated at</th>
+        <th>Comment</th>
+      </tr>
+      <tr ng-repeat="blog in blogs">
+        <td></td>
+        <td>{{ blog.username }}</td>
+        <td>{{ blog.waittime }}</td>
+        <td>{{ blog.lastUpdate }}</td>
+        <td>{{ blog.comment }}</td>
+      </tr>
+    </table>
   </div>

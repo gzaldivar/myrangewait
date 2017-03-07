@@ -68,23 +68,25 @@
       <th>State</th>
       <th>Zip</th>
       <th>Phone</th>
-      <th>Details</th>
+      <th>Edit</th>
     </tr>
     <tr ng-repeat="result in searchresults">
       <td>
-        <div ng-if="user._id === result.user">
-          <a ui-sref="edit({rangeid: result._id})" ng-model="searchlist.id" ng-click="showrange(result._id)">{{ result.name }}</a>
-        </div>
-        <div ng-if="user._id !== result.user"}>
-          <a ui-sref="showrange({rangeid: result._id})" ng-model="searchlist.id" ng-click="showrange(result._id)">{{ result.name }}</a>
-        </div>
+        <a ui-sref="showrange({rangeid: result._id})" ng-model="searchlist.id" ng-click="showrange(result._id)">{{ result.name }}</a>
       </td>
       <td>{{ result.addressNumber + " " +  result.street }}</td>
       <td>{{ result.city }}</td>
       <td>{{ result.state }}</td>
       <td>{{ result.zip }}</td>
       <td>{{ result.phone }}</td>
-      <td>{{ user.id }}<!-- a ui-sref="details({rangeid: result._id})" ng-model="searchlist.id" ng-click="addDetails(result._id)" ng-show="result.stalls.length > 0">Details</a></td-->
+      <td>
+        <div ng-if="user._id === result.user">
+          <a ui-sref="edit({rangeid: result._id})" ng-model="searchlist.id" ng-click="showrange(result._id)">{{ result.name }}</a>
+        </div>
+        <div ng-if="user._id !== result.user"}>
+          
+        </div>
+      </td>
     </tr>
   </table>
 </div>
