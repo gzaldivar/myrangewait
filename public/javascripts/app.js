@@ -1,24 +1,38 @@
-angular.module('routerApp', ['ui.router'])
-  .run(function($rootScope, $http, $location) {
-      $rootScope.loggedIn = function() {
+angular.module('routerApp', ['ui.router', 'ezfb'])
+  .run(function($rootScope) {
+
+/*      $rootScope.loggedIn = function() {
         $http.post('/isloggedIn').success(function(data) {
           if(data.state == 'success') {
             $rootScope.authenticated = true;
             $rootScope.user = data.user;
-            $rootScope.username = data.user.username;
+
+            if ($rootScope.user) {
+              if ($rootScope.user.twitter) {
+                $rootScope.username = $rootScope.user.twitter.username;
+              } else if ($rootScope.user.facebook) {
+                $rootScope.username = $rootScope.user.facebook.email;
+              } else if ($rootScope.user.google) {
+                $rootScope.username = $rootScope.user.google.email;
+              } else if ($rootScope.user.local) {
+                $rootScope.username = $rootScope.user.local.email;
+              }
+            }
+
             $location.path('/search');
           } else {
             $rootScope.authenticated = false;
             $rootScope.user = null;
             $rootScope.username = '';
-            $location.path('/search');
+            $location.path('/home');
           }
         });
       };
 
-//      $rootScope.loggedIn();
+     $rootScope.loggedIn();
+     */
       $rootScope.title = "My Range Wait";
-  })
+   })
 
   .config(function($stateProvider, $urlRouterProvider) {
 
@@ -43,9 +57,7 @@ angular.module('routerApp', ['ui.router'])
       .state('home', {
         url: '/home',
         templateUrl: 'partials/home.ejs',
-        controller: function($scope, $rootScope) {
-                $scope.title = $rootScope.title;
-            }
+        controller: 'loginController'
       })
       .state('profile', {
         url: '/profile',
@@ -86,3 +98,27 @@ angular.module('routerApp', ['ui.router'])
         params: { rangeid: null }
       })
   })
+
+  .config(function(ezfbProvider) {
+    ezfbProvider.setInitParams({
+      // This is my FB app id for plunker demo app
+      appId: '597916630401657',
+    });
+  })
+
+  .config(['$httpProvider', function ($httpProvider) {
+     $httpProvider.interceptors.push(['$q', '$location', function ($q, $location) {
+            return {
+                'responseError': function(response) {
+                    if (response.status === 401) {
+
+                    } else if (response.status === 403) {
+                        $location.path('/home'); // Replace with whatever should happen
+                    } else if (response.status === 404) {
+
+                    }
+                    return $q.reject(response);
+                }
+            };
+        }]);
+    }])

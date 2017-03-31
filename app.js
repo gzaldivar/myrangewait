@@ -9,31 +9,19 @@ var session = require('express-session');
 var cors = require('cors');
 
 var mongoose = require('mongoose');
-var passport = require('passport');
+//var passport = require('passport');
 var flash    = require('connect-flash');
 
 var configDB = require('./config/database.js');
 
 var app = express();
 
-process.env.NODE_ENV = 'development';
+// process.env.NODE_ENV = 'development';
 
 app.get('/partials/:name', function (req, res) {
   var name = req.params.name;
   res.render('partials/' + name);
 });
-
-app.get('/partials/rangesearch/:name', function (req, res) {
-  var name = req.params.name;
-  res.render('partials/rangesearch/' + name);
-});
-
-require('./config/passport')(passport); // pass passport for configuration
-
-var index = require('./routes/index');
-var users = require('./routes/users');
-var gunrange = require('./routes/gunrange');
-var blog = require('./routes/blog');
 
 mongoose.Model.on('index', function(err) {
   if (err) logger.error(err);
@@ -47,6 +35,13 @@ console.log(app.settings.env);
 mongoose.connect(configDB.mongoURI[app.settings.env])
   .then(() =>  console.log('connection succesful'))
   .catch((err) => console.error(err));
+
+//require('./config/passport')(passport); // pass passport for configuration
+
+var index = require('./routes/index');
+var users = require('./routes/users');
+var gunrange = require('./routes/gunrange');
+var blog = require('./routes/blog');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -63,6 +58,7 @@ app.use(cors());
 app.use(cookieParser());
 
 // required for passport
+/*
 app.use(session({
   secret: 'keyboard cat',
   resave: false,
@@ -70,14 +66,15 @@ app.use(session({
   saveUninitialized: true
 //  cookie: { secure: true }
 }));
+*/
 
 app.use(flash()); // use connect-flash for flash messages stored in session
 
-app.use(passport.initialize());
+//app.use(passport.initialize());
 //app.use(passport.session()); // persistent login sessions
 
 // routes ======================================================================
-require('./routes/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
+//require('./routes/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
 
 app.use('/', index);
 app.use('/users', users);

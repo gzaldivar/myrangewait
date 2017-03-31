@@ -1,4 +1,4 @@
-angular.module('routerApp').factory('blogFactory', ['$http', function($http) {
+angular.module('routerApp').factory('blogFactory', ['$http', '$rootScope', function($http, $rootScope) {
   var blogs = [];
 
   var getBlogs = function(rangeid, blogclbk) {

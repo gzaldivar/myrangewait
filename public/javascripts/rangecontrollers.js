@@ -1,12 +1,10 @@
 
-angular.module('routerApp').controller('rangesearchController', ['$scope', '$rootScope', '$http', '$location', 'rangeResults', 'statesList', 'isLoggedInFactory',
-function($scope, $rootScope, $http, $location, rangeResults, statesList, isLoggedInFactory) {
+angular.module('routerApp').controller('rangesearchController', ['$scope', '$rootScope', '$http', '$location', 'rangeResults', 'statesList',
+function($scope, $rootScope, $http, $location, rangeResults, statesList) {
 
-//    isLoggedInFactory.getUser(function(user) {
-      $scope.user = $rootScope.user;
-      $scope.username = $rootScope.username;
-      $scope.title = $rootScope.title;
-//    })
+  $scope.user = $rootScope.user;
+  $scope.username = $rootScope.username;
+  $scope.title = $rootScope.title;
 
   rangeResults.refreshSearchResults(function(results) {
     $scope.searchresults = results;

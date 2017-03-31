@@ -1,0 +1,35 @@
+<DOCTYPE html>
+<doctype html>
+<html>
+<head>
+  <% include partials/head %>
+</head>
+<body>
+<div class="container">
+
+    <div class="page-header text-center">
+        <h1><span class="fa fa-anchor"></span> Welcome Page</h1>
+    </div>
+
+    <div class="row">
+
+      <div class="col-sm-6">
+          <div class="well">
+              <div ng-if="user.facebook">
+                    <strong>email</strong>:<%= user.facebook.email %><br>
+                    <strong>password</strong>:<%= user.facebook.name %>
+              </div>
+          </div>
+      </div>
+    </div>
+    <p>
+    <div class="row">
+      <a ui-sref="facebook" class="btn btn-default btn-md" ng-click="facebooklogin()">Logout</a>
+    </div>
+  </div>
+<footer>
+    <% include partials/footer %>
+</footer>
+
+</body>
+</html>

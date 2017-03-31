@@ -1,14 +1,11 @@
-angular.module('routerApp').controller('loginController', ['$scope', '$rootScope', '$http', '$location',
-function($scope, $rootScope, $http, $location) {
+angular.module('routerApp').controller('loginController', ['$scope', '$rootScope', '$http', '$location', 'ezfb',
+function($scope, $rootScope, $http, $location, ezfb) {
 
-  $scope.loginuser = function() {
+  var userlogin = function(logindata) {
     $http({
-      url: __env.apiUrl + 'login',
+      url: __env.loginUrl + 'login/auth/login',
       method: "POST",
-      data: {
-        email: $scope.email,
-        password: $scope.password
-      }
+      data: logindata
     })
     .then(function(response){
       if (response.status == 200) {
@@ -25,18 +22,37 @@ function($scope, $rootScope, $http, $location) {
       } else {
         $rootScope.user = null;
         $rootScope.token = null;
+        $scope.username = null;
+        $scope.user = null;
         $location.url('/home');
       }
     });
+  };
+
+  $scope.loginuser = function() {
+    var logindata = {
+      user: {
+        local: {
+          email: $scope.email,
+          password: $scope.password
+        }
+      }
+    }
+
+    userlogin(logindata);
   }
 
   $scope.signupuser = function() {
     $http({
-      url: __env.apiUrl + 'signup',
+      url: __env.loginUrl + 'login/auth/signup',
       method: "POST",
       data: {
-        email: $scope.email,
-        password: $scope.password
+        user: {
+          local: {
+            email: $scope.email,
+            password: $scope.password
+          }
+        }
       }
     })
     .then(function(response){
@@ -52,23 +68,46 @@ function($scope, $rootScope, $http, $location) {
     });
   }
 
-  $scope.logoutuser = function() {
-    $rootScope.user = null;
-    $rootScope.token = null;
+  $scope.fblogin = function() {
+    ezfb.getLoginStatus(function(res) {
+        /**
+       * Calling FB.login with required permissions specified
+       * https://developers.facebook.com/docs/reference/javascript/FB.login/v2.0
+       */
+//      ezfb.login(null, {scope: 'email,user_likes'});
 
-    $http({
-      url: __env.apiUrl + 'logout',
-      method: "GET"
-    })
-    .then(function(response){
-      $location.url('/home');
+     ezfb.login(function (res) {
+       console.log(res);
+     }, {scope: 'email'})
+      .then(function (res) {
+        if (res.status === "connected") {
+          return ezfb.api('/me');
+        } else {
+          alert('login failed');
+        }
+     })
+     .then(function(me) {
+       console.log(me);
+
+        var logindata = {
+          user:
+            { facebook:
+              { id: me.id,
+                name: me.name,
+                token: res.authResponse.accessToken
+              }
+            }
+          };
+
+        userlogin(logindata);
+     });
+
+       /* Note that the `res` result is shared.
+       * Changing the `res` in 1 will also change the one in 2
+       */
+
     });
-  }
-
-  $scope.userprofile = function() {
-    $scope.username = getUsername();
-    $scope.user = $rootScope.user;
-  }
+  };
 
   $scope.unlink = function() {
     $http({
@@ -113,17 +152,37 @@ function($scope, $rootScope, $http, $location) {
       if ($rootScope.user.twitter) {
         return $rootScope.user.twitter.username;
       } else if ($rootScope.user.facebook) {
-        return $rootScope.user.facebook.email;
+        return $rootScope.user.facebook.name;
       } else if ($rootScope.user.google) {
         return $rootScope.user.google.email;
-      } else {
+      } else if ($rootScope.user.local) {
         return $rootScope.user.local.email;
       }
     }
   }
 
+  $scope.logoutuser = function() {
+    console.log($rootScope.user);
+
+    $http({
+      url: __env.loginUrl + 'login/auth/logout',
+      method: "POST",
+      data: { user: $rootScope.user }
+    })
+    .then(function(response){
+      $scope.user = $rootScope.user = null;
+      $scope.token = $rootScope.token = null;
+      $scope.username = $rootScope.username = null;
+      $location.url('/home');
+    });
+  }
+
   $scope.title = $rootScope.title;
-  $scope.username = $rootScope.username = getUsername();
+
+  if ($rootScope.user) {
+    $scope.user = $rootScope.user;
+    $scope.username = $rootScope.username = getUsername();
+  }
 
   return {
     getUsername : getUsername

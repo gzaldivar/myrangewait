@@ -6,8 +6,11 @@ var nodeGeocoder = require('node-geocoder');
 var mongoose = require('mongoose');
 var Gunrange = require('../models/gunrange');
 
-const expressJwt = require('express-jwt');
-const jwtAuthenticate = expressJwt({secret : 'server secret'});
+var configAuth = require('../config/auth');
+var request = require('request');
+
+//const expressJwt = require('express-jwt');
+//const jwtAuthenticate = expressJwt({secret : 'server secret'});
 
 var options = {
   provider: 'google',
@@ -26,7 +29,7 @@ router.get('/', function(req, res, next) {
 });
 
 /* GET /gunrange/id */
-router.get('/:id', jwtAuthenticate, function(req, res, next) {
+router.get('/:id', function(req, res, next) {
   var ObjectId = require('mongoose').Types.ObjectId;
   var query = { zip: new ObjectId(req.query.zip) };
   console.log("search by id");
@@ -37,164 +40,198 @@ router.get('/:id', jwtAuthenticate, function(req, res, next) {
 });
 
 /* GET /gunrange/name */
-router.get('/search/getbyzip', jwtAuthenticate, function(req, res, next) {
+router.get('/search/getbyzip', function(req, res, next) {
   console.log("zip= ", req.query.zip);
   console.log("distance= ", req.query.distance);
 
-  var limit = req.query.limit || 10;
+  request.get(authurl(req), function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      var limit = req.query.limit || 10;
 
-  // get the max distance or set it to 10 miles. Miles is multplied by number of meters in a mile - 1609.34
-  var maxDistance = (req.query.distance * 1609.34) || 16093.4;
+      // get the max distance or set it to 10 miles. Miles is multplied by number of meters in a mile - 1609.34
+      var maxDistance = (req.query.distance * 1609.34) || 16093.4;
 
-  // we need to convert the distance to radians
-  // the raduis of Earth is approximately 6371 kilometers
-//  maxDistance /= 6371;
+      // we need to convert the distance to radians
+      // the raduis of Earth is approximately 6371 kilometers
+    //  maxDistance /= 6371;
 
-  geocoder.geocode(req.query.zip, function (err, georesult) {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log("longitude= " + georesult[0].longitude + " latitude= " + georesult[0].latitude +
-    " maxdistance= " + maxDistance);
-
-      Gunrange.find({
-        loc: {
-          $near: {
-            $geometry: {
-              type: "Point",
-              coordinates: [parseFloat(georesult[0].longitude), parseFloat(georesult[0].latitude)]
-            },
-            $maxDistance: maxDistance
-          }
-        }
-//        {
-//          "$near": [georesult[0].longitude, georesult[0].latitude],
-//          "$maxDistance": maxDistance
-      })
-      .limit(limit)
-      .exec(function(err, docs) {
+      geocoder.geocode(req.query.zip, function (err, georesult) {
         if (err) {
           console.log(err);
-          res.status(404).send(err);
         } else {
-          if (docs.length > 0) {
-            docs.message = "Results of search"
-            res.json(docs);
-          } else {
-            res.json({ status: 200, message: "No results found"});
-          }
+          console.log("longitude= " + georesult[0].longitude + " latitude= " + georesult[0].latitude +
+        " maxdistance= " + maxDistance);
+
+          Gunrange.find({
+            loc: {
+              $near: {
+                $geometry: {
+                  type: "Point",
+                  coordinates: [parseFloat(georesult[0].longitude), parseFloat(georesult[0].latitude)]
+                },
+                $maxDistance: maxDistance
+              }
+            }
+    //        {
+    //          "$near": [georesult[0].longitude, georesult[0].latitude],
+    //          "$maxDistance": maxDistance
+          })
+          .limit(limit)
+          .exec(function(err, docs) {
+            if (err) {
+              console.log(err);
+              res.status(404).send(err);
+            } else {
+              if (docs.length > 0) {
+                docs.message = "Results of search"
+                res.json(docs);
+              } else {
+                res.json({ status: 200, message: "No results found"});
+              }
+            }
+          });
         }
       });
+    } else {
+      res.json({ status: 401, "status": "unauthorized" });
     }
   });
 });
 
 /* GET /gunrange/state */
-router.get('/search/state', jwtAuthenticate, function(req, res, next) {
-  console.log("Search by state");
-  var query = new RegExp(urlencode(req.query.state), "i");
-  console.log(query);
-  Gunrange.find({ state: query }, function (err, docs) {
-    if (err) {
-      return next(err);
+router.get('/search/state', function(req, res, next) {
+  request.get(authurl(req), function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      var query = new RegExp(urlencode(req.query.state), "i");
+      Gunrange.find({ state: query }, function (err, docs) {
+        if (err) {
+          return next(err);
+        } else {
+          res.json(docs);
+        }
+      });
     } else {
-      res.json(docs);
+      res.json({ status: 401, "status": "unauthorized" });
     }
   });
 });
 
 /* GET /gunrange/name */
-router.get('/search/name', jwtAuthenticate, function(req, res, next) {
+router.get('/search/name', function(req, res, next) {
   console.log("Search by name");
-  var query = new RegExp(urlencode(req.query.name), "i");
-  console.log(query);
-  Gunrange.find({name: query}, function (err, docs) {
-    if (err) return next(err);
-    res.json(docs);
+  request.get(authurl(req), function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      var query = new RegExp(urlencode(req.query.name), "i");
+      console.log(query);
+      Gunrange.find({name: query}, function (err, docs) {
+        if (err) return next(err);
+        res.json(docs);
+      });
+    } else {
+      res.json({ status: 401, "status": "unauthorized" });
+    }
   });
 });
 
 /* POST /Gunrange */
-router.post('/', jwtAuthenticate, function(req, res, next) {
+router.post('/', function(req, res, next) {
   console.log("adding a range");
-  var address = req.body.addressNumber + " " + req.body.street + " " + req.body.city;
+  request.get(authurl(req), function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      var address = req.body.addressNumber + " " + req.body.street + " " + req.body.city;
 
-  geocoder.geocode(address, function (err, georesult) {
-    if (err) {
-      console.log(err);
-    } else {
+      geocoder.geocode(address, function (err, georesult) {
+        if (err) {
+          console.log(err);
+        } else {
 
-      var range = createRange(req, georesult);
+          var range = createRange(req, georesult);
 
-      if (range == null) {
-        res.status(200).send({ error: "Error - Address could not be found"});
-      } else {
-
-        Gunrange.create(range, function (err, post) {
-          if (err) {
-            console.log(err);
-            res.status(200).send({ error: "Error - " + err.message });
+          if (range == null) {
+            res.status(200).send({ error: "Error - Address could not be found"});
           } else {
-            res.json(post);
+
+            Gunrange.create(range, function (err, post) {
+              if (err) {
+                console.log(err);
+                res.status(200).send({ error: "Error - " + err.message });
+              } else {
+                res.json(post);
+              }
+            });
           }
-        });
-      }
+        }
+      });
+    } else {
+      res.json({ status: 401, "status": "unauthorized" });
     }
   });
 });
 
 /* PUT /Gunrange/:id */
-router.put('/:id', jwtAuthenticate, function(req, res, next) {
-  return Gunrange.findById(req.params.id, function(err, range){
+router.put('/:id', function(req, res, next) {
+  request.get(authurl(req), function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      return Gunrange.findById(req.params.id, function(err, range){
 
-    var address = req.body.addressNumber + " " + req.body.street + " " + req.body.city;
+        var address = req.body.addressNumber + " " + req.body.street + " " + req.body.city;
 
-    geocoder.geocode(address, function (err, georesult) {
-      if (err) {
-        console.log(err);
-      } else {
+        geocoder.geocode(address, function (err, georesult) {
+          if (err) {
+            console.log(err);
+          } else {
 
-        var aRange = createRange(req, georesult);
+            var aRange = createRange(req, georesult);
 
-        if (aRange == null) {
-          res.status(404).send({ error: "Address could not be found"});
-        } else {
-
-          range.name = aRange.name;
-          range.addressNumber = aRange.addressNumber;
-          range.street = aRange.street;
-          range.city = aRange.city;
-          range.state = aRange.state;
-          range.county = aRange.county;
-          range.zip = aRange.zip;
-          range.loc = aRange.loc;
-          range.phone = aRange.phone;
-          range.rangetype = aRange.rangetype;
-          range.stalls = aRange.stalls;
-          range.loc = aRange.loc;
-          range.user = aRange.user;
-          range.url = aRange.url;
-
-          return range.save(function(err){
-            if (!err) {
-              console.log("updated: " + range.name);
-              res.json(range);
+            if (aRange == null) {
+              res.status(404).send({ error: "Address could not be found"});
             } else {
-              console.log(err);
-              return next(err);
+
+              range.name = aRange.name;
+              range.addressNumber = aRange.addressNumber;
+              range.street = aRange.street;
+              range.city = aRange.city;
+              range.state = aRange.state;
+              range.county = aRange.county;
+              range.zip = aRange.zip;
+              range.loc = aRange.loc;
+              range.phone = aRange.phone;
+              range.rangetype = aRange.rangetype;
+              range.stalls = aRange.stalls;
+              range.loc = aRange.loc;
+              range.user = aRange.user;
+              range.url = aRange.url;
+
+              return range.save(function(err){
+                if (!err) {
+                  console.log("updated: " + range.name);
+                  res.json(range);
+                } else {
+                  console.log(err);
+                  return next(err);
+                }
+              });
             }
-          });
-        }
-      }
-    });
-  })
+          }
+        });
+      })
+    } else {
+      res.json({ status: 401, "status": "unauthorized" });
+    }
+  });
 });
 
 /* DELETE /Gunrange/:id */
-router.delete('/:id', jwtAuthenticate, function(req, res, next) {
-  Gunrange.findByIdAndRemove(req.params.id, req.body, function (err, post) {
-    if (err) return next(err);
-    res.json(post);
+router.delete('/:id', function(req, res, next) {
+  request.get(authurl(req), function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      Gunrange.findByIdAndRemove(req.params.id, req.body, function (err, post) {
+        if (err) return next(err);
+        res.json(post);
+      });
+    } else {
+      res.json({ status: 401, "status": "unauthorized" });
+    }
   });
 });
 
@@ -236,5 +273,16 @@ var createRange = function(req, georesult) {
     url : req.body.url
   }
 }
+
+var authurl = function(req) {
+  var options = {
+    url: configAuth.loginAuth.host + configAuth.loginAuth.port + configAuth.loginAuth.path + '/authenticate',
+    headers: {
+      'Authorization': req.headers.authorization
+    }
+  };
+
+  return options;
+};
 
 module.exports = router;

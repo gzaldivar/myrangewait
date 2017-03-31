@@ -1,28 +1,34 @@
-var jwt = require('jsonwebtoken');
-const expressJwt = require('express-jwt');
-const jwtAuthenticate = expressJwt({secret : 'server secret'});
+var request = require('request');
+
+var configAuth = require('../config/auth');
+
+var http = require('http');
+
+var User = require('../models/user');
 
 module.exports = function(app, passport) {
 
-    // =====================================
-    // HOME PAGE (with login links) ========
-    // =====================================
-//    app.get('/', function(req, res) {
-//        res.render('index.ejs'); // load the index.ejs file
-//
-    // =====================================
-    // LOGIN ===============================
-    // =====================================
-    // show the login form
-    app.get('/login', function(req, res) {
-
-        // render the page and pass in any flash data if it exists
-        res.render('login.ejs', { message: req.flash('loginMessage') });
-    });
-
     // process the login form
     app.post('/login', function(req, res, next) {
-      passport.authenticate('local-login', function(err, user, info) {
+      var url = configAuth.loginAuth.host + configAuth.loginAuth.port + configAuth.loginAuth.path + '/login';
+
+      request.post(url,
+        { json: { user: { local: { email: req.body.email, password: req.body.password } } }} ,
+          function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                console.log(body)
+
+                if (body.status === "success") {
+                  res.json({ status: "success", token: body.token, user: body.user });
+                } else {
+                  res.status(200).json({ status: "failed" });
+                }
+            } else {
+              console.log(error);
+            }
+          }
+      );
+/*      passport.authenticate('local-login', function(err, user, info) {
         if (err) { return next(err) }
         if (!user) {
           res.status(200).json({ status: "failed" });
@@ -39,35 +45,39 @@ module.exports = function(app, passport) {
         }
 
       })(req, res, next);
+      */
     });
-//    {
-//        successRedirect : '/rangemenu', // redirect to the secure profile section
-//        failureRedirect : '/login', // redirect back to the signup page if there is an error
-//        failureFlash : true // allow flash messages
-//    }
-//  ));
 
     // =====================================
     // SIGNUP ==============================
     // =====================================
     // show the signup form
-    app.get('/signup', function(req, res) {
+/*    app.get('/signup', function(req, res) {
 
         // render the page and pass in any flash data if it exists
         res.render('signup.ejs', { message: req.flash('signupMessage') });
     });
-
+*/
     // process the signup form
     app.post('/signup', function(req, res, next) {
-      passport.authenticate('local-signup', function(err, user, info) {
-        if (err) { return next(err) }
-        if (!user) {
-          res.status(200).json({ status: "failed" });
-        } else {
-          res.json({ status: "success", user: user });
-        }
+      var url = configAuth.loginAuth.host + configAuth.loginAuth.port + configAuth.loginAuth.path + '/signup';
 
-      })(req, res, next);
+      request.post(url,
+        { json: { user: { local: { email: req.body.email, password: req.body.password } } }} ,
+          function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                console.log(body)
+
+                if (body.status === "success") {
+                  res.json({ status: "success", user: body.user });
+                } else {
+                  res.status(200).json({ status: "failed" });
+                }
+            } else {
+              console.log(error);
+            }
+          }
+      );
     });
 //    {
 //        successRedirect : '/rangemenu', // redirect to the secure profile section
@@ -76,52 +86,55 @@ module.exports = function(app, passport) {
 //    }));
 
     // =====================================
-    // PROFILE SECTION =====================
-    // =====================================
-    // we will want this protected so you have to be logged in to visit
-    // we will use route middleware to verify this (the isLoggedIn function)
-    app.get('/profile', isLoggedIn, function(req, res) {
-      console.log(req.user);
-        res.render('profile.ejs', {
-            user : req.user, // get the user out of session and pass to template
-            title: 'My Range Wait'
-        });
-    });
-
-    // =====================================
     // RANGEMENU SECTION =====================
     // =====================================
     // we will use route middleware to verify this (the isLoggedIn function)
     app.get('/rangemenu', function(req, res) {
-        res.render('rangemenu.ejs', {
-            user : req.user, // get the user out of session and pass to template
-            title: 'My Range Wait'
-        });
-    });
-
-    // =====================================
-    // RANGEMENU SECTION =====================
-    // =====================================
-    // we will use route middleware to verify this (the isLoggedIn function)
-    app.get('/about', function(req, res) {
-        res.render('about.ejs', {
-            title: 'My Range Wait',
-            user: req.user
-        });
+      res.render('rangemenu.ejs');
     });
 
     // =====================================
     // FACEBOOK ROUTES =====================
     // =====================================
     // route for facebook authentication and login
-    app.get('/auth/facebook', passport.authenticate('facebook', { scope : ['email'] }));
+//    app.get('/auth/facebook', passport.authenticate('facebook', { scope : ['email'] }));
 
     // handle the callback after facebook has authenticated the user
-    app.get('/auth/facebook/callback',
-        passport.authenticate('facebook', {
-            successRedirect : '/rangemenu',
-            failureRedirect : '/'
-    }));
+    app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/' }),
+      function(req, res) {
+    // Successful authentication, redirect to welcome page.
+    console.log(res);
+        res.redirect('/rangemenu'); //?userid=' + req.user._id);
+    });
+
+    app.get('/auth/facebook', function(response) {
+      console.log(response);
+    });
+    app.post('/auth/facebook', function(response) {
+      console.log(response);
+    });
+/*    function(req, res, next) {
+        passport.authenticate('facebook', function(err, user) {
+          if (err) { return next(err) }
+          if (!user) {
+            res.status(200).json({ status: "failed" });
+          } else {
+
+            //user has authenticated correctly thus we create a JWT token
+            var token = jwt.sign({
+                id: user._id,
+              }, 'server secret', {
+                expiresIn : 60*60*24
+              });
+
+            res.json({ status: "success", token: token, user: user });
+          }
+
+        })(req, res, next);
+*/
+//            successRedirect : '/fbwelcome',
+//            failureRedirect : '/'
+//    }));
 
     // =====================================
     // TWITTER ROUTES ======================
